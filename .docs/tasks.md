@@ -22,15 +22,15 @@
 
 ### 0.1 Project Scaffolding `[BLOCKER]`
 
-- [ ] Initialize pnpm workspace: `pnpm create vite opencrafter --template react-ts`
-- [ ] Configure TypeScript (`tsconfig.json`): strict mode, path aliases (`@/` → `src/`)
-- [ ] Install and configure Tailwind CSS v4
-- [ ] Install and configure shadcn/ui (set up `components.json`, install base components: Button, Dialog, DropdownMenu, Popover, Tooltip, Sheet, Tabs, Badge, Input, Textarea, Select, Separator, ScrollArea)
-- [ ] Configure ESLint (flat config, `eslint-config-prettier`, `@typescript-eslint`)
-- [ ] Configure Prettier (`.prettierrc`)
-- [ ] Configure Vitest (`vitest.config.ts`, setup file, coverage)
-- [ ] Add Lucide React
-- [ ] Add `clsx` + `tailwind-merge` → export as `cn()` utility
+- [x] Initialize pnpm workspace: `pnpm create vite opencrafter --template react-ts`
+- [x] Configure TypeScript (`tsconfig.json`): strict mode, path aliases (`@/` → `src/`)
+- [x] Install and configure Tailwind CSS v4
+- [x] Install and configure shadcn/ui (set up `components.json`, install base components: Button, Dialog, DropdownMenu, Popover, Tooltip, Sheet, Tabs, Badge, Input, Textarea, Select, Separator, ScrollArea)
+- [x] Configure ESLint (flat config, `eslint-config-prettier`, `@typescript-eslint`)
+- [x] Configure Prettier (`.prettierrc`)
+- [x] Configure Vitest (`vitest.config.ts`, setup file, coverage)
+- [x] Add Lucide React
+- [x] Add `clsx` + `tailwind-merge` → export as `cn()` utility
 
 ### 0.2 Domain Types `[BLOCKER]`
 
