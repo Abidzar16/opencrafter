@@ -120,3 +120,55 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* ── Tiptap prose editor ────────────────────────────────────── */
+.prose-editor {
+  min-height: 200px;
+  font-size: 1rem;
+  line-height: 1.8;
+  color: var(--foreground);
+}
+
+.prose-editor p {
+  margin-bottom: 1em;
+}
+
+.prose-editor p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  color: var(--muted-foreground);
+  pointer-events: none;
+  float: left;
+  height: 0;
+}
+
+.prose-editor h1 { font-size: 1.875rem; font-weight: 700; margin-bottom: 0.5em; margin-top: 1.5em; }
+.prose-editor h2 { font-size: 1.5rem;   font-weight: 700; margin-bottom: 0.5em; margin-top: 1.25em; }
+.prose-editor h3 { font-size: 1.25rem;  font-weight: 600; margin-bottom: 0.4em; margin-top: 1em; }
+
+.prose-editor blockquote {
+  border-left: 3px solid var(--border);
+  padding-left: 1rem;
+  color: var(--muted-foreground);
+  margin: 1em 0;
+}
+
+.prose-editor ul, .prose-editor ol { padding-left: 1.5rem; margin-bottom: 1em; }
+.prose-editor li { margin-bottom: 0.25em; }
+.prose-editor strong { font-weight: 700; }
+.prose-editor em { font-style: italic; }
+.prose-editor u { text-decoration: underline; }
+.prose-editor s { text-decoration: line-through; }
+.prose-editor code {
+  background: var(--muted);
+  border-radius: 0.25rem;
+  padding: 0.1em 0.3em;
+  font-size: 0.875em;
+  font-family: ui-monospace, monospace;
+}
+
+/* Tippy tooltip reset for slash menu */
+.tippy-box[data-theme~='slash-menu'] {
+  background: transparent;
+  box-shadow: none;
+}
+

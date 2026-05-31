@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { GripVertical, Copy, Archive, Trash2, MoveRight, FileText, ExternalLink } from 'lucide-react'
+import { GripVertical, Copy, Archive, Trash2, MoveRight, FileText, ExternalLink, History } from 'lucide-react'
 import { InlineEdit } from './inline-edit'
 import { MoveSceneDialog } from './move-dialog'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { ActionMenu } from '@/components/ui/action-menu'
+import { RevisionHistoryModal } from '@/components/ui/revision-history-modal'
 import {
   useUpdateScene,
   useDeleteScene,
@@ -15,6 +16,7 @@ import {
 import { useEditorStore } from '@/stores/editor-store'
 import { toast } from 'sonner'
 import type { Scene } from '@/types'
+import { RevisionEntityType } from '@/types'
 
 interface SceneRowProps {
   scene: Scene
@@ -41,6 +43,7 @@ function exportSceneText(scene: Scene) {
 export function SceneRow({ scene, novelId }: SceneRowProps) {
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [moveOpen, setMoveOpen] = useState(false)
+  const [revisionOpen, setRevisionOpen] = useState(false)
 
   const updateScene = useUpdateScene()
   const deleteScene = useDeleteScene()
@@ -94,6 +97,11 @@ export function SceneRow({ scene, novelId }: SceneRowProps) {
       label: 'Export scene',
       icon: <FileText className="h-4 w-4" />,
       onClick: () => exportSceneText(scene),
+    },
+    {
+      label: 'Version history',
+      icon: <History className="h-4 w-4" />,
+      onClick: () => setRevisionOpen(true),
     },
     {
       label: 'Delete',
@@ -162,6 +170,16 @@ export function SceneRow({ scene, novelId }: SceneRowProps) {
           toast.success('Scene moved')
         }}
         onClose={() => setMoveOpen(false)}
+      />
+
+      <RevisionHistoryModal
+        open={revisionOpen}
+        onOpenChange={setRevisionOpen}
+        entityType={RevisionEntityType.SceneContent}
+        entityId={scene.id}
+        onRestore={() => {
+          toast.info('Open the scene in Write mode to restore a version.')
+        }}
       />
     </div>
   )

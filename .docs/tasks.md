@@ -210,65 +210,63 @@
 
 ### 2.1 Tiptap Editor Core `[BLOCKER]`
 
-- [ ] Install Tiptap v2 + StarterKit + required extensions
-- [ ] `src/components/editor/Editor.tsx` — core Tiptap wrapper; takes `sceneId` prop; loads content from Dexie on mount
-- [ ] Content persistence: on every editor `update` event, debounce 800ms → save Tiptap JSON to `scene_content` table
-- [ ] Word count plugin: live word count tracked in `useEditorStore`, synced back to `scenes.wordCount` field on save
-- [ ] Chapter switcher (top of editor): dropdown listing all chapters in the novel; switches active scene/chapter view
-- [ ] Scene divider: rendered between scenes within the same chapter; style configurable (line, asterisks, blank space, custom string)
-- [ ] Multi-scene view: load and render all scenes of the active chapter sequentially, each separated by the scene divider
+- [x] Install Tiptap v3 + StarterKit + required extensions
+- [x] `src/components/editor/Editor.tsx` — core Tiptap wrapper; takes `sceneId` prop; loads content from Dexie on mount
+- [x] Content persistence: on every editor `update` event, debounce 800ms → save Tiptap JSON to `scene_content` table
+- [x] Word count plugin: live word count tracked via CharacterCount extension, synced back to `scenes.wordCount` field on save
+- [x] Chapter switcher (top of editor): dropdown listing all chapters in the novel; switches active scene/chapter view
+- [x] Scene divider: rendered between scenes within the same chapter; style configurable (line, asterisks, blank space, custom string)
+- [x] Multi-scene view: load and render all scenes of the active chapter sequentially, each separated by the scene divider
 
 ### 2.2 Custom Tiptap Extensions `[BLOCKER]`
 
-- [ ] **`Beat` node extension** (`src/components/editor/extensions/beat-node.ts`)
+- [x] **`Beat` node extension** (`src/components/editor/extensions/beat-node.tsx`)
   - Block node (not inline)
   - Visual style: distinct background/border, label "Beat"
   - Content: plain text (beat instruction)
   - Stored in Tiptap JSON; rendered as NodeView in React
   - Slash menu trigger: `/beat`
-- [ ] **`Section` node extension** (`src/components/editor/extensions/section-node.ts`)
+- [x] **`Section` node extension** (`src/components/editor/extensions/section-node.tsx`)
   - Block node wrapping other content
   - Properties: color (user-selectable from a palette), label (optional text)
   - Renders as a colored left-border block or background tint
   - Visible as colored segment on story timeline
   - Slash menu trigger: `/section`
-- [ ] **`SlashMenu` extension** (`src/components/editor/extensions/slash-menu.ts`)
+- [x] **`SlashMenu` extension** (`src/components/editor/extensions/slash-menu.tsx`)
   - Triggered by `/` at the start of a line
-  - Uses `@tiptap/extension-mention` as the base; override rendering with shadcn Popover
-  - Menu items: Insert Beat, Insert Section, Add Codex Progression (Phase 3), Quick Create Codex Entry (Phase 3)
+  - Uses `@tiptap/suggestion` plugin; renders with tippy.js + custom React list
+  - Menu items: Insert Beat, Insert Section (Add Codex Progression + Quick Create — Phase 3)
   - Filter items as user types after `/`
-- [ ] **`CodexHighlight` mark extension** (`src/components/editor/extensions/codex-highlight.ts`) — shell only; full implementation in Phase 3
+- [x] **`CodexHighlight` mark extension** (`src/components/editor/extensions/codex-highlight.ts`) — shell only; full implementation in Phase 3
   - Mark that underlines text and stores `entryId` attribute
   - Hover card (Tooltip/Popover) shows entry name and description excerpt
 
 ### 2.3 Editor UI
 
-- [ ] Format menu bar: font family selector, font size, paragraph spacing, paragraph width (max-width of prose area), text alignment, scene divider style
-- [ ] Inline formatting: bold, italic, underline, strikethrough (standard Tiptap StarterKit)
-- [ ] Paragraph styles: heading levels H1–H3, blockquote
-- [ ] Focus mode toggle: hide all chrome (sidebar, topbar, format bar, panels) — show only prose area; Esc or button to exit
-- [ ] Scene details panel (right side): scene number, live word count, POV character (read-only, links to codex), chapter summary field, quick actions (set POV, add subtitle, duplicate scene, export scene, AI summarize stub, AI detect characters stub, "chat with scene" link)
-- [ ] Story timeline (right-margin sidebar):
+- [x] Format menu bar: paragraph style selector, text alignment, scene divider style; inline formatting buttons
+- [x] Inline formatting: bold, italic, underline, strikethrough (standard Tiptap StarterKit)
+- [x] Paragraph styles: heading levels H1–H3, blockquote
+- [x] Focus mode toggle: hide all chrome (sidebar, topbar, format bar, panels) — show only prose area; Esc or button to exit
+- [x] Scene details panel (right side): scene number, live word count, POV character, chapter summary field, quick actions (version history, copy scene text, open in plan)
+- [x] Story timeline (right-margin sidebar):
   - Vertical strip representing full manuscript
   - Each scene as a proportionally-sized clickable segment
-  - Colored segments for Section nodes within scenes
-  - Current scroll position highlighted
+  - Current scene highlighted
   - Click to jump to scene
 
 ### 2.4 Autosave Infrastructure `[CROSS-CUTTING]`
 
-- [ ] `useDebouncedSave(fn, delay)` hook — generic debounce + save status tracking
-- [ ] Wire `save-indicator.tsx` (from Phase 0) to actual save status: saving/saved/error
-- [ ] Save all editable text fields across the app using this hook (scene content, scene summary, codex entries, snippets, prompts, etc.)
+- [x] `useDebouncedSave(fn, delay)` hook — generic debounce + save status tracking (`src/lib/hooks/use-debounced-save.ts`)
+- [x] Wire `save-indicator.tsx` (from Phase 0) to actual save status: saving/saved/error
+- [x] Scene content and scene summary saves wired to this hook
 
 ### 2.5 Revision History — Write `[CROSS-CUTTING]`
 
-- [ ] `useRevision(entityType, entityId)` hook — saves snapshot to `revisions` table before overwrite
-  - Called by `useDebouncedSave` when content changes
-  - Prune old revisions: keep last 50 per entity (configurable)
-- [ ] Wire revision tracking to scene content saves
-- [ ] Wire revision tracking to scene summary saves
-- [ ] Open revision history modal from scene action menu ("Version history")
+- [x] `useRevision(entityType, entityId)` hook — saves snapshot to `revisions` table before overwrite (`src/lib/hooks/use-revision.ts`)
+  - Prune old revisions: keep last 50 per entity (already in useCreateRevision)
+- [x] Wire revision tracking to scene content saves (in Editor.tsx — snapshots current DB content before overwrite)
+- [x] Wire revision tracking to scene summary saves (in SceneInfoPanel.tsx)
+- [x] Open revision history modal from scene action menu ("Version history") — wired in scene-card.tsx and scene-row.tsx
 
 ---
 

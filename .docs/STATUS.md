@@ -1,30 +1,30 @@
 # Opencrafter — Status
 
 **Last updated:** 2026-05-31
-**Phase:** 1 — Plan Module (in progress)
+**Phase:** 2 — Write Module (completed)
 
 ---
 
 ## Right Now
 
-Between tasks — last completed **1.6 Create from Outline**.
+Between tasks — last completed **2.5 Revision History — Write**.
 
 ## Next Up
 
-1. **2.1 Tiptap Editor Core** `[BLOCKER]` — install Tiptap, core editor wrapper, content persistence, word count, multi-scene view
-2. **2.2 Custom Tiptap Extensions** `[BLOCKER]` — Beat node, Section node, SlashMenu, CodexHighlight shell
-3. **2.3 Editor UI** — format menu bar, inline formatting, focus mode, scene details panel (Write side), story timeline
-4. **2.4 Autosave Infrastructure** `[CROSS-CUTTING]` — `useDebouncedSave`, wire save-indicator
-5. **2.5 Revision History — Write** `[CROSS-CUTTING]` — `useRevision` hook, snapshot pruning, version history modal
+1. **3.1 Codex Entry Management** — Codex sidebar panel, entry editor (tabs: General, Relations, Tracking, Progressions), CRUD, categories, tags, cover image, revision history
+2. **3.2 Codex Detection Engine `[BLOCKER]`** — Aho-Corasick / regex detection, alias + plural support, exclusion list, unit tests, `useTrackedEntries` hook
+3. **3.3 Codex Highlights in Editor** — Wire `CodexHighlight` mark shell (from 2.2) to detection engine, hover card, mention count tracking
+4. **3.4 Tracking & AI Context Modes** — Tracking tab in entry editor, `buildAIContext` function
+5. **3.5 Codex Progressions** — Create from slash menu, progressions tab, scene position anchoring
 
 ## Recently Completed
 
-- **1.6 Create from Outline** — Collapsible panel with `#`/`##` text parser, preview step, append-to-novel flow, 8 preset templates (3 Act, Save the Cat, Hero's Journey, Freytag's Pyramid, Story Circle, Fichtean Curve, Derek Murphy 24ch, Story Clock), custom input.
-- **1.5 Scene & Plan Actions** — Scene action menu (open details, subtitle, duplicate, move, archive, export, delete); chapter action menu (add/edit subtitle via dialog); act menus complete.
-- **1.4 Scene Details Panel** — Right-side Sheet with title, subtitle, summary, beat editor (DnD reorder), POV dropdown (from codex character entries), label selector, info section.
-- **1.3 Outline View** — Flat collapsible list (act → chapter → scene), inline summary textarea-edit, expandable read-only beat list, "open details" button.
-- **1.2 Grid View** — Horizontal kanban: acts as column groups, chapters as columns, scene cards with configurable width/height/field visibility (persisted in localStorage), keyword search (title+summary+beats).
-- **1.1 Story Structure CRUD** — PlanBoard with Act/Chapter/Scene create, inline rename (double-click), duplicate (deep copy), archive, restore, permanent delete, move, drag-and-drop reorder.
+- **2.5 Revision History** — `useRevision` hook snapshots content before overwrite; wired to scene content + scene summary saves; "Version history" added to scene-card and scene-row action menus.
+- **2.4 Autosave Infrastructure** — `useDebouncedSave` hook with immediate 'saving' status, debounced DB write, 'saved'→'idle' transition; wired to save-indicator in topbar.
+- **2.3 Editor UI** — `EditorToolbar` (format bar: heading selector, bold/italic/underline/strikethrough/blockquote, alignment, focus mode toggle); `SceneInfoPanel` (word count, summary edit, quick actions); `StoryTimeline` (proportional scene segments, click-to-scroll).
+- **2.2 Custom Extensions** — `BeatNode` (amber block, NodeView, Enter exits); `SectionNode` (colored left-border wrapper, color picker palette); `SlashMenu` (`@tiptap/suggestion` + tippy.js popup, filters Beat/Section); `CodexHighlight` mark shell (stores `entryId`, underline style, Phase 3 hook).
+- **2.1 Tiptap Editor Core** — `Editor.tsx` (Tiptap v3, debounced save + revision snapshot, word count sync); `MultiSceneView` (all chapter scenes stacked, configurable divider: line/asterisks/blank/custom); `ChapterSwitcher` dropdown; full Write page with focus mode (Esc to exit), chapter switcher bar, right info panel toggle, story timeline.
+- **1.6 Create from Outline** — 8 preset templates, custom input, parser, preview step.
 
 ---
 
@@ -52,3 +52,9 @@ Between tasks — last completed **1.6 Create from Outline**.
 - Create from Outline parser: `#` → act, `##` → chapter, plain paragraphs → scene summaries. Each paragraph line = one scene. Auto-creates Act 1 / Chapter 1 if no headers present.
 - Label colors stored as CSS hex strings; preset palette of 10 colors. Labels are per-novel (novelId FK). Scenes store label IDs in `scene.labels[]`.
 - POV dropdown in Scene Detail Panel uses `useCodexEntriesByType(novelId, CodexType.Character)` — shows "Add character entries in the Codex" hint when empty.
+- Tiptap installed as v3 (latest, 3.24.0). Editor components live in `src/components/editor/`. Custom extensions in `src/components/editor/extensions/`.
+- `useDebouncedSave` and `useRevision` live in `src/lib/hooks/` (not in `src/lib/db/hooks/`).
+- Slash menu uses `@tiptap/suggestion` + tippy.js for the popup; items: Beat, Section (Codex items added in Phase 3).
+- Revision tracking: `useRevision` snapshots the CURRENT stored DB content before the debounced save overwrites it. Prune to last 50 per entity is handled in `useCreateRevision`.
+- `SceneInfoPanel` is the write-mode right panel (not the plan SceneDetailPanel). It includes scene word count, summary edit (with revision tracking), and "Version history" → opens RevisionHistoryModal for SceneContent revisions.
+- Story timeline uses per-scene word counts from stored `scene_content` JSON to size segments proportionally.

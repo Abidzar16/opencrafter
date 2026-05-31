@@ -2,14 +2,16 @@ import { useCodexEntry } from '@/lib/db/hooks'
 import { useEditorStore } from '@/stores/editor-store'
 import { Badge } from '@/components/ui/badge'
 import { ActionMenu } from '@/components/ui/action-menu'
+import { RevisionHistoryModal } from '@/components/ui/revision-history-modal'
 import { cn } from '@/lib/utils'
-import { Copy, Archive, Trash2, MoveRight, User, FileText } from 'lucide-react'
+import { Copy, Archive, Trash2, MoveRight, User, FileText, History } from 'lucide-react'
 import { useState } from 'react'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { MoveSceneDialog } from './move-dialog'
 import { useUpdateScene, useDeleteScene, useDuplicateScene, useMoveScene } from '@/lib/db/hooks'
 import { toast } from 'sonner'
 import type { Scene, Label } from '@/types'
+import { RevisionEntityType } from '@/types'
 import type { CardConfig } from './card-config'
 
 interface SceneCardProps {
@@ -33,6 +35,7 @@ function PovBadge({ povCharacterId }: { povCharacterId?: string }) {
 export function SceneCard({ scene, novelId, config, labels }: SceneCardProps) {
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [moveOpen, setMoveOpen] = useState(false)
+  const [revisionOpen, setRevisionOpen] = useState(false)
   const { setActiveScene } = useEditorStore()
 
   const updateScene = useUpdateScene()
@@ -90,6 +93,11 @@ export function SceneCard({ scene, novelId, config, labels }: SceneCardProps) {
       label: 'Export scene',
       icon: <FileText className="h-4 w-4" />,
       onClick: exportScene,
+    },
+    {
+      label: 'Version history',
+      icon: <History className="h-4 w-4" />,
+      onClick: () => setRevisionOpen(true),
     },
     {
       label: 'Delete',
@@ -174,6 +182,16 @@ export function SceneCard({ scene, novelId, config, labels }: SceneCardProps) {
           toast.success('Scene moved')
         }}
         onClose={() => setMoveOpen(false)}
+      />
+
+      <RevisionHistoryModal
+        open={revisionOpen}
+        onOpenChange={setRevisionOpen}
+        entityType={RevisionEntityType.SceneContent}
+        entityId={scene.id}
+        onRestore={() => {
+          toast.info('Open the scene in Write mode to restore a version.')
+        }}
       />
     </>
   )
