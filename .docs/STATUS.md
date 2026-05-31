@@ -1,25 +1,26 @@
 # Opencrafter — Status
 
-**Last updated:** 2026-05-30
+**Last updated:** 2026-05-31
 **Phase:** 0 — Foundation (in progress)
 
 ---
 
 ## Right Now
 
-Task **0.2 Domain Types** — defining all TypeScript interfaces in `src/types/`.
+Between tasks — last completed **0.2 Domain Types**.
 
 ## Next Up
 
-1. **0.2 Domain Types** `[BLOCKER]` — all TypeScript interfaces in `src/types/`
-2. **0.3 Dexie Schema & Hooks** `[BLOCKER]` — all tables + indexes + CRUD hooks
-3. **0.4 UI Infrastructure** — Toast, ConfirmDialog, ActionMenu, EmptyState, ImageUpload, RevisionHistoryModal
-4. **0.5 TanStack Router & App Shell** `[BLOCKER]` — routes, Zustand stores, novel shell layout
-5. **0.6 Novel Library** — library page, create/delete/archive novel, series grouping
+1. **0.3 Dexie Schema & Hooks** `[BLOCKER]` — all tables + indexes + CRUD hooks
+2. **0.4 UI Infrastructure** — Toast, ConfirmDialog, ActionMenu, EmptyState, ImageUpload, RevisionHistoryModal
+3. **0.5 TanStack Router & App Shell** `[BLOCKER]` — routes, Zustand stores, novel shell layout
+4. **0.6 Novel Library** — library page, create/delete/archive novel, series grouping
+5. **0.7 Data Backup & Docker** — JSON export/import, Dockerfile, nginx, CI
 
 ## Recently Completed
 
-- **0.1 Project Scaffolding** — Vite + React 18 + TypeScript 5 strict; Tailwind v4 (@tailwindcss/vite); shadcn/ui New York style (13 components); ESLint flat config + Prettier; Vitest v4 with jsdom; Lucide React; `cn()` utility. pnpm v11 with esbuild build approved via pnpm-workspace.yaml.
+- **0.1 Project Scaffolding** — Vite + React 18 + TypeScript 5 strict; Tailwind v4; shadcn/ui New York style; ESLint + Prettier; Vitest v4; Lucide React; `cn()` utility.
+- **0.2 Domain Types** — All TypeScript interfaces in `src/types/`: Novel, Series, Act, Chapter, Scene, SceneContent, Beat, CodexEntry/Relation/Progression, Prompt, ModelConfig, Provider, ApiKey, ChatThread/Message, Snippet, Revision, Label. `index.ts` re-exports all. Typecheck passes clean.
 
 ---
 
@@ -32,3 +33,5 @@ Task **0.2 Domain Types** — defining all TypeScript interfaces in `src/types/`
 - Session protocol: read STATUS.md on open, update it on every task completion and before close.
 - pnpm v11: esbuild build script approved via `pnpm-workspace.yaml` (`allowBuilds: esbuild: true`). shadcn/ui uses umbrella `radix-ui` package (not individual `@radix-ui/*` packages).
 - Vitest is at v4 (latest), not v2 — update any docs referencing v2.
+- `ai.ts` exports `AiChatMessage` (re-aliased from `ChatMessage`) in `index.ts` to avoid collision with `chat.ts`'s `ChatMessage`.
+- Tiptap JSON content fields (`SceneContent.content`, `CodexEntry.description/notes`, `Snippet.content`) typed as `Record<string, unknown>` — compatible with Dexie structured-clone storage; no premature coupling to Tiptap's own types before it's installed.

@@ -36,16 +36,16 @@
 
 > Define all TypeScript interfaces before implementing any feature. These live in `src/types/` and are the contract between the DB, stores, and components.
 
-- [ ] `src/types/novel.ts` — Novel, Series, NovelSettings
-- [ ] `src/types/structure.ts` — Act, Chapter, Scene (with full field set: title, summary, beats, povCharacterId, labels, wordCount, order, archived)
-- [ ] `src/types/codex.ts` — CodexEntry, CodexDetail, CodexRelation, CodexProgression, CodexType enum, AiContextMode enum, TrackingSettings
-- [ ] `src/types/prompt.ts` — Prompt, PromptType enum, PromptComponent, PromptPersona, PromptPreset, PromptInput, ModelConfig, ModelCollection
-- [ ] `src/types/ai.ts` — Provider enum, ApiKey, GenerationRequest, GenerationResult, StreamChunk
-- [ ] `src/types/chat.ts` — ChatThread, ChatMessage, ChatRole enum, ContextAttachment
-- [ ] `src/types/snippet.ts` — Snippet
-- [ ] `src/types/revision.ts` — Revision, RevisionEntityType enum
-- [ ] `src/types/label.ts` — Label
-- [ ] `src/types/index.ts` — re-export all types
+- [x] `src/types/novel.ts` — Novel, Series, NovelSettings
+- [x] `src/types/structure.ts` — Act, Chapter, Scene (with full field set: title, summary, beats, povCharacterId, labels, wordCount, order, archived)
+- [x] `src/types/codex.ts` — CodexEntry, CodexDetail, CodexRelation, CodexProgression, CodexType enum, AiContextMode enum, TrackingSettings
+- [x] `src/types/prompt.ts` — Prompt, PromptType enum, PromptComponent, PromptPersona, PromptPreset, PromptInput, ModelConfig, ModelCollection
+- [x] `src/types/ai.ts` — Provider enum, ApiKey, GenerationRequest, GenerationResult, StreamChunk
+- [x] `src/types/chat.ts` — ChatThread, ChatMessage, ChatRole enum, ContextAttachment
+- [x] `src/types/snippet.ts` — Snippet
+- [x] `src/types/revision.ts` — Revision, RevisionEntityType enum
+- [x] `src/types/label.ts` — Label
+- [x] `src/types/index.ts` — re-export all types
 
 ### 0.3 Dexie Schema & Hooks `[BLOCKER]`
 
