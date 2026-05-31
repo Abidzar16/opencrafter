@@ -23,9 +23,9 @@ import type {
 } from '@/types'
 
 // Extend ModelConfig for storage (ModelCollection is not a separate table)
-interface StoredModelConfig extends ModelConfig {}
+type StoredModelConfig = ModelConfig
 
-export interface StoredApiKey extends ApiKey {}
+export type StoredApiKey = ApiKey
 
 export class OpenCrafterDB extends Dexie {
   novels!: EntityTable<Novel, 'id'>

@@ -1,30 +1,27 @@
 # Opencrafter — Status
 
 **Last updated:** 2026-05-31
-**Phase:** 2 — Write Module (completed)
+**Phase:** 3 — Codex Module (tasks 3.1–3.5 complete)
 
 ---
 
 ## Right Now
 
-Between tasks — last completed **2.5 Revision History — Write**.
+Between tasks — last completed **3.5 Codex Progressions**.
 
 ## Next Up
 
-1. **3.1 Codex Entry Management** — Codex sidebar panel, entry editor (tabs: General, Relations, Tracking, Progressions), CRUD, categories, tags, cover image, revision history
-2. **3.2 Codex Detection Engine `[BLOCKER]`** — Aho-Corasick / regex detection, alias + plural support, exclusion list, unit tests, `useTrackedEntries` hook
-3. **3.3 Codex Highlights in Editor** — Wire `CodexHighlight` mark shell (from 2.2) to detection engine, hover card, mention count tracking
-4. **3.4 Tracking & AI Context Modes** — Tracking tab in entry editor, `buildAIContext` function
-5. **3.5 Codex Progressions** — Create from slash menu, progressions tab, scene position anchoring
+1. **3.6 Codex Relations** — Relations tab already implemented; bidirectional backlink auto-create is wired; need to verify inbound display. Deferred detail: "Referenced entry can be pulled into AI context via relation" checkbox in context selector (Phase 6).
+2. **3.7 Quick Create & Pinning** — `/new codex entry` slash menu item (minimal creation modal), sidebar pin button (CSS split-panel), scene codex associations badge.
+3. **Phase 4 — AI Layer** — Provider infrastructure (4.1), API key management UI (4.2), model collections (4.3), streaming prose generation (4.4), NeverInclude enforcement (4.5).
 
 ## Recently Completed
 
-- **2.5 Revision History** — `useRevision` hook snapshots content before overwrite; wired to scene content + scene summary saves; "Version history" added to scene-card and scene-row action menus.
-- **2.4 Autosave Infrastructure** — `useDebouncedSave` hook with immediate 'saving' status, debounced DB write, 'saved'→'idle' transition; wired to save-indicator in topbar.
-- **2.3 Editor UI** — `EditorToolbar` (format bar: heading selector, bold/italic/underline/strikethrough/blockquote, alignment, focus mode toggle); `SceneInfoPanel` (word count, summary edit, quick actions); `StoryTimeline` (proportional scene segments, click-to-scroll).
-- **2.2 Custom Extensions** — `BeatNode` (amber block, NodeView, Enter exits); `SectionNode` (colored left-border wrapper, color picker palette); `SlashMenu` (`@tiptap/suggestion` + tippy.js popup, filters Beat/Section); `CodexHighlight` mark shell (stores `entryId`, underline style, Phase 3 hook).
-- **2.1 Tiptap Editor Core** — `Editor.tsx` (Tiptap v3, debounced save + revision snapshot, word count sync); `MultiSceneView` (all chapter scenes stacked, configurable divider: line/asterisks/blank/custom); `ChapterSwitcher` dropdown; full Write page with focus mode (Esc to exit), chapter switcher bar, right info panel toggle, story timeline.
-- **1.6 Create from Outline** — 8 preset templates, custom input, parser, preview step.
+- **3.5 Codex Progressions** — `ProgressionPicker` dialog from slash menu (`/codex progression`); `ProgressionBadge` inline annotations with tooltip; Progressions tab in EntryEditor (list + inline edit/delete); `useCodexProgressionsByScene` hook; wired into `buildAIContext`.
+- **3.4 Tracking & AI Context** — Tracking tab in EntryEditor (enable toggle, case-sensitive, exclusion list chips, AI context mode, NeverInclude warning). `buildAIContext()` in `src/lib/ai/context-builder.ts` + `renderContextBlocks()` helper.
+- **3.3 Codex Highlights** — `codex-detection-plugin.ts` (ProseMirror DecorationSet, requestIdleCallback debounce, meta-transaction so autosave skipped); `CodexHoverCard.tsx` (portal, mouseover listener, entry name/type/excerpt); mention count updates to DB.
+- **3.2 Detection Engine** — `src/lib/codex-detector/index.ts` (regex alternation, word boundaries, auto-plurals, exclusion overlap, longest-match-wins); 17 unit tests passing; `useTrackedEntries` hook.
+- **3.1 Codex Entry Management** — `CodexSidebar` (grouped by type, collapsible sections, search, new-entry button); `EntryEditor` (4-tab Sheet: General/Relations/Tracking/Progressions; alias+tag chips, Tiptap description/notes with revision history, key-value details, cover image, category); CRUD + duplicate; wired to NovelShell icon sidebar.
 
 ---
 
@@ -54,7 +51,12 @@ Between tasks — last completed **2.5 Revision History — Write**.
 - POV dropdown in Scene Detail Panel uses `useCodexEntriesByType(novelId, CodexType.Character)` — shows "Add character entries in the Codex" hint when empty.
 - Tiptap installed as v3 (latest, 3.24.0). Editor components live in `src/components/editor/`. Custom extensions in `src/components/editor/extensions/`.
 - `useDebouncedSave` and `useRevision` live in `src/lib/hooks/` (not in `src/lib/db/hooks/`).
-- Slash menu uses `@tiptap/suggestion` + tippy.js for the popup; items: Beat, Section (Codex items added in Phase 3).
+- Slash menu uses `@tiptap/suggestion` + tippy.js for the popup; items: Beat, Section, Codex Progression. Codex Progression dispatches `OPEN_PROGRESSION_PICKER_EVENT` DOM custom event; MultiSceneView listens and opens ProgressionPicker dialog.
 - Revision tracking: `useRevision` snapshots the CURRENT stored DB content before the debounced save overwrites it. Prune to last 50 per entity is handled in `useCreateRevision`.
 - `SceneInfoPanel` is the write-mode right panel (not the plan SceneDetailPanel). It includes scene word count, summary edit (with revision tracking), and "Version history" → opens RevisionHistoryModal for SceneContent revisions.
 - Story timeline uses per-scene word counts from stored `scene_content` JSON to size segments proportionally.
+- Codex detection plugin: ProseMirror DecorationSet plugin (`codex-detection-plugin.ts`). Uses `requestIdleCallback` (with setTimeout fallback) + 50ms leadtime. Dispatches meta-transaction with key `CODEX_DETECTION_META` — Editor.tsx uses `onTransaction` (not `onUpdate`) and skips save for these meta transactions.
+- `ProseEditor.tsx` — lightweight Tiptap wrapper (StarterKit + Underline + Placeholder); used in EntryEditor for description/notes fields.
+- `buildAIContext` lives in `src/lib/ai/context-builder.ts` — pure async function, imports `db` directly (not a hook).
+- `RevisionEntityType.CodexDescription` for entry description revisions; `RevisionEntityType.CodexNotes` for notes revisions.
+- Codex sidebar opens as a 288px panel between the icon strip and main content in NovelShell when `activePanel === 'codex'`.

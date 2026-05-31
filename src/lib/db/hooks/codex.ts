@@ -1,6 +1,8 @@
+import { useMemo } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import db from '../db'
 import type { CodexEntry, CodexRelation, CodexProgression, CodexType } from '@/types'
+import type { TrackedEntry } from '@/lib/codex-detector'
 
 // Codex Entries
 
@@ -114,4 +116,34 @@ export function useDeleteCodexProgression() {
   return async (id: string): Promise<void> => {
     await db.codex_progressions.delete(id)
   }
+}
+
+/**
+ * Returns all codex entries that have tracking enabled for the given novel,
+ * shaped as TrackedEntry objects for the detection engine.
+ * Memoized — re-runs only when entries change.
+ */
+export function useTrackedEntries(novelId: string | undefined): TrackedEntry[] {
+  const entries = useCodexEntries(novelId)
+  return useMemo(() => {
+    if (!entries) return []
+    return entries
+      .filter(e => e.trackingSettings.enabled)
+      .map(e => ({
+        entryId: e.id,
+        name: e.name,
+        aliases: e.aliases,
+        trackingSettings: e.trackingSettings,
+      }))
+  }, [entries])
+}
+
+/**
+ * Returns progressions for a given scene (across all entries).
+ */
+export function useCodexProgressionsByScene(sceneId: string | undefined) {
+  return useLiveQuery(
+    () => (sceneId ? db.codex_progressions.where('sceneId').equals(sceneId).toArray() : []),
+    [sceneId],
+  )
 }

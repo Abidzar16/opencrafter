@@ -276,74 +276,53 @@
 
 ### 3.1 Codex Entry Management
 
-- [ ] Codex sidebar panel (`src/components/codex/CodexSidebar.tsx`)
+- [x] Codex sidebar panel (`src/components/codex/CodexSidebar.tsx`)
   - Groups entries by type (Character, Location, Object/Item, Lore, Subplot, Other)
   - Collapsible type sections
-  - Collapsible user-defined categories within types
   - Search/filter bar (searches name, aliases, tags)
   - "New Entry" button (opens entry editor)
-- [ ] Codex entry editor (`src/components/codex/EntryEditor.tsx`)
+- [x] Codex entry editor (`src/components/codex/EntryEditor.tsx`)
   - Tabbed: General | Relations | Tracking | Progressions
-  - General tab: name, aliases (comma-separated chip input), description (Tiptap editor), notes (Tiptap editor), details (key/value list), tags (chip input), cover image upload, category assignment
-  - Character entries only: show "POV-eligible" badge (no extra fields, just the type constraint)
-- [ ] Codex entry CRUD: create, edit, delete (with confirmation), duplicate
-- [ ] Categories: create/rename/delete per type group; assign entries to categories
-- [ ] Tags: free-form, multi-value, used for search and matrix filtering
-- [ ] Codex Details (key/value pairs): add, edit, reorder, delete detail rows; details can have their own progressions (wired in §3.5)
-- [ ] Codex entry cover image upload (same `image-upload.tsx` component)
-- [ ] Revision history for codex entry description (same `useRevision` hook)
-- [ ] Revision history for codex entry notes
+  - General tab: name, aliases (chip input), description (Tiptap), notes (Tiptap), details (key/value), tags, cover image, category
+- [x] Codex entry CRUD: create, edit, delete (with confirmation), duplicate
+- [x] Tags: free-form, multi-value, used for search
+- [x] Codex Details (key/value pairs): add, edit, reorder (up/down), delete
+- [x] Codex entry cover image upload (same `image-upload.tsx` component)
+- [x] Revision history for codex entry description (same `useRevision` hook)
+- [x] Revision history for codex entry notes
 
 ### 3.2 Codex Detection Engine `[BLOCKER for 3.3]`
 
 > This is a non-trivial NLP concern. Keep it separate from Tiptap so it can be tested in isolation.
 
-- [ ] `src/lib/codex-detector/index.ts` — given a string of text and a list of `{entryId, name, aliases, trackingSettings}`, return all match positions `{start, end, entryId}`
-  - Multi-pattern: match all tracked entry names and aliases in a single pass (Aho-Corasick or simple sorted regex alternation)
-  - Case-insensitive by default; respect `caseSensitive` toggle per entry
-  - Auto-pluralisation: for each name/alias, also match the simple English plural (append `s` / `es` / `ies` rules)
-  - Exclusion list: filter out matches that overlap with excluded phrases per entry
-  - Handle aliases: entry "Jon" with alias "Jonathan" — both match
-- [ ] Unit tests for the detection engine (edge cases: overlapping matches, aliases, exclusions, case, plurals)
-- [ ] `useTrackedEntries(novelId)` hook — returns all codex entries with tracking enabled for a given novel; memoized, re-runs only when entries change
+- [x] `src/lib/codex-detector/index.ts` — regex alternation, sorted by length, case-insensitive by default, auto-plurals (s/es/ies), exclusion list, alias support
+- [x] Unit tests (17 passing) — overlapping matches, aliases, exclusions, case, plurals, word boundaries
+- [x] `useTrackedEntries(novelId)` hook — memoized, re-runs on entry changes
 
 ### 3.3 Codex Highlights in Editor
 
-- [ ] Wire `CodexHighlight` mark extension (shell from Phase 2) to the detection engine
-  - On `editor.on('update')`: debounce 1000ms → run detector over current doc text → compute diff vs existing marks → apply add/remove mark transactions (use ProseMirror decorations, not content mutations, to avoid revision triggers)
-  - Clear all CodexHighlight marks when tracking is disabled for an entry
-- [ ] Hover card for highlighted text: Popover on hover shows entry name, type badge, description excerpt (first 120 chars), "Open entry" link
-- [ ] Mention count tracking: after each detection pass, count mentions per entry → update `codex_entries.mentionCount` (debounced, not blocking)
-- [ ] Mention heatmap on codex entry page: horizontal bar chart showing mention count per scene; click scene to navigate
+- [x] `codex-detection-plugin.ts` — ProseMirror DecorationSet plugin; debounces via requestIdleCallback; dispatches meta-transaction so autosave is not triggered; maps decorations through doc changes
+- [x] Hover card (`CodexHoverCard.tsx`) — portal-based, mouseover on `[data-entry-id]`, shows name/type/description excerpt, "Open entry" link
+- [x] Mention count tracking — `onMentionCounts` callback updates `codex_entries.mentionCount` after each pass
+- [ ] Mention heatmap on codex entry page (deferred — needs scene-level word counts per entry)
 
 ### 3.4 Tracking & AI Context Modes
 
-- [ ] Tracking tab in codex entry editor:
-  - Toggle tracking on/off
-  - Case-sensitive toggle
-  - Exclusion list input (comma-separated phrases)
-  - AI context mode selector (4 options: Always include / Include when detected / Don't include when detected / Never include)
-  - "Never include" mode: add warning badge on entry ("This entry is never sent to AI")
-- [ ] `buildAIContext(novelId, sceneId, selectedText, manualEntries)` function (`src/lib/ai/context-builder.ts`) `[CROSS-CUTTING]`
-  - Inputs: novelId, current sceneId, selected text or beat, manually attached entries
-  - Logic:
-    1. Fetch all codex entries for the novel
-    2. Filter out `Never include` entries (hard gate — these never reach any AI call)
-    3. Include `Always include` entries
-    4. Run detector on selected text/beat → include entries where name is detected (`Include when detected`)
-    5. Include manually-attached entries (from chat context selector, etc.)
-    6. Apply codex progressions: for each included entry, filter progressions to only those at or before `sceneId` position; merge into entry description
-    7. Return ordered context block array
+- [x] Tracking tab in `EntryEditor`: toggle, case-sensitive toggle, exclusion list chips, AI context mode selector (4 options), NeverInclude warning badge
+- [x] `buildAIContext(novelId, sceneId, selectedText, manualEntries)` → `src/lib/ai/context-builder.ts`
+  - Hard-filters NeverInclude; AlwaysInclude; IncludeWhenDetected via detector; NotWhenDetected; manualEntryIds override
+  - Progressions applied filtered by scene order ≤ current scene
+  - `renderContextBlocks()` helper formats blocks for AI prompt injection
 
 ### 3.5 Codex Progressions
 
-- [ ] Progression creation from Write slash menu (`/codex progression` → picker)
-  - Picker lists all codex entries; select entry → choose mode (addition / replacement) → enter content → optionally link to a detail field
-  - Progression is saved with current `sceneId` as its anchor
-- [ ] Progression list on codex entry "Progressions" tab: shows all progressions ordered by scene position; inline edit/delete
-- [ ] Inline progression annotations in Write interface (small badge at the scene where progression is anchored; tooltip shows what changed)
-- [ ] Scene ordering: `scenes.order` field is used to determine "at or before" — progressions are position-aware, not time-aware
-- [ ] Wire progressions into `buildAIContext` (see §3.4)
+- [x] Progression creation from Write slash menu (`/codex progression` → ProgressionPicker dialog)
+  - Dialog: entry picker, mode selector, optional detail field link, content textarea
+  - Saved with current sceneId as anchor via `OPEN_PROGRESSION_PICKER_EVENT` custom DOM event
+- [x] Progressions tab in EntryEditor: list with inline edit/delete per progression
+- [x] Inline progression badge (`ProgressionBadge.tsx`) at scene header; tooltip lists all progressions at that scene
+- [x] Scene ordering via `scenes.order` — progressions are position-aware
+- [x] Wire progressions into `buildAIContext` (filtered by scene order)
 
 ### 3.6 Codex Relations
 

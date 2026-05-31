@@ -6,26 +6,38 @@ import Placeholder from '@tiptap/extension-placeholder'
 import Underline from '@tiptap/extension-underline'
 import TextAlign from '@tiptap/extension-text-align'
 import Typography from '@tiptap/extension-typography'
+import { Extension } from '@tiptap/core'
 import { BeatNode } from './extensions/beat-node'
 import { SectionNode } from './extensions/section-node'
 import { SlashMenu } from './extensions/slash-menu'
 import { CodexHighlight } from './extensions/codex-highlight'
-import { useSceneContent, useSaveSceneContent, useUpdateScene } from '@/lib/db/hooks'
+import { createCodexDetectionPlugin, CODEX_DETECTION_META } from './extensions/codex-detection-plugin'
+import { useSceneContent, useSaveSceneContent, useUpdateScene, useUpdateCodexEntry } from '@/lib/db/hooks'
 import { useDebouncedSave } from '@/lib/hooks/use-debounced-save'
 import { useRevision } from '@/lib/hooks/use-revision'
 import { RevisionEntityType } from '@/types'
+import type { TrackedEntry } from '@/lib/codex-detector'
 import db from '@/lib/db/db'
 
 interface EditorProps {
   sceneId: string
+  novelId: string
+  trackedEntries: TrackedEntry[]
   onEditorReady?: (editor: ReturnType<typeof useEditor>) => void
   onWordCountChange?: (count: number) => void
 }
 
-export function Editor({ sceneId, onEditorReady, onWordCountChange }: EditorProps) {
+export function Editor({
+  sceneId,
+  novelId,
+  trackedEntries,
+  onEditorReady,
+  onWordCountChange,
+}: EditorProps) {
   const sceneContent = useSceneContent(sceneId)
   const saveSceneContent = useSaveSceneContent()
   const updateScene = useUpdateScene()
+  const updateCodexEntry = useUpdateCodexEntry()
   const saveRevision = useRevision(RevisionEntityType.SceneContent, sceneId)
 
   // Track whether content was loaded into the editor for this sceneId
@@ -33,11 +45,28 @@ export function Editor({ sceneId, onEditorReady, onWordCountChange }: EditorProp
   const onWordCountChangeRef = useRef(onWordCountChange)
   useEffect(() => { onWordCountChangeRef.current = onWordCountChange }, [onWordCountChange])
 
+  // Keep trackedEntries fresh for the detection plugin via ref
+  const trackedEntriesRef = useRef(trackedEntries)
+  useEffect(() => { trackedEntriesRef.current = trackedEntries }, [trackedEntries])
+
+  // Update mention counts in DB (debounced via the plugin callback)
+  const novelIdRef = useRef(novelId)
+  useEffect(() => { novelIdRef.current = novelId }, [novelId])
+
+  const handleMentionCounts = useCallback(
+    (counts: Record<string, number>) => {
+      // Fire-and-forget batch update
+      Object.entries(counts).forEach(([entryId, mentionCount]) => {
+        updateCodexEntry(entryId, { mentionCount }).catch(() => {})
+      })
+    },
+    [updateCodexEntry],
+  )
+
   const doSave = useCallback(async () => {
     if (!editor || editor.isDestroyed) return
     const json = editor.getJSON()
 
-    // Snapshot current stored content before overwrite
     const stored = await db.scene_content.get(sceneId)
     if (stored?.content && Object.keys(stored.content).length > 0) {
       await saveRevision(JSON.stringify(stored.content))
@@ -53,6 +82,21 @@ export function Editor({ sceneId, onEditorReady, onWordCountChange }: EditorProp
 
   const triggerSave = useDebouncedSave(doSave, 800)
 
+  // Build a stable Extension that holds the PM plugin
+  const codexDetectionExtension = useRef(
+    Extension.create({
+      name: 'codexDetectionPlugin',
+      addProseMirrorPlugins() {
+        return [
+          createCodexDetectionPlugin(
+            () => trackedEntriesRef.current,
+            handleMentionCounts,
+          ),
+        ]
+      },
+    }),
+  ).current
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({ history: { depth: 100 } }),
@@ -65,13 +109,16 @@ export function Editor({ sceneId, onEditorReady, onWordCountChange }: EditorProp
       SectionNode,
       SlashMenu,
       CodexHighlight,
+      codexDetectionExtension,
     ],
     editorProps: {
       attributes: {
         class: 'prose-editor focus:outline-none',
       },
     },
-    onUpdate: () => {
+    // Use onTransaction to filter out detection-only dispatches from save
+    onTransaction: ({ transaction }) => {
+      if (transaction.getMeta(CODEX_DETECTION_META)) return
       triggerSave()
     },
   })
@@ -79,8 +126,8 @@ export function Editor({ sceneId, onEditorReady, onWordCountChange }: EditorProp
   // Load content whenever sceneId changes
   useEffect(() => {
     if (!editor || editor.isDestroyed) return
-    if (sceneContent === undefined) return // still loading
-    if (loadedSceneIdRef.current === sceneId) return // already loaded
+    if (sceneContent === undefined) return
+    if (loadedSceneIdRef.current === sceneId) return
 
     const content =
       sceneContent?.content && Object.keys(sceneContent.content).length > 0

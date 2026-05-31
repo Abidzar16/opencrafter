@@ -118,6 +118,7 @@ function WritePage() {
             >
               {activeChapterId ? (
                 <MultiSceneView
+                  novelId={novelId}
                   chapterId={activeChapterId}
                   activeSceneId={activeSceneId}
                   onSceneActive={handleSceneActive}

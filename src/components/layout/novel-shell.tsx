@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Separator } from '@/components/ui/separator'
 import { SaveIndicator } from './save-indicator'
+import { CodexSidebar } from '@/components/codex/CodexSidebar'
 import { useUIStore } from '@/stores/ui-store'
 import { useNovel } from '@/lib/db/hooks/novels'
 import { cn } from '@/lib/utils'
@@ -160,6 +161,13 @@ export function NovelShell({ novelId, children }: NovelShellProps) {
             </Tooltip>
           ))}
         </aside>
+
+        {/* Side panel (Codex, Snippets, etc.) */}
+        {activePanel === 'codex' && (
+          <div className="border-border bg-background w-72 shrink-0 overflow-hidden border-r">
+            <CodexSidebar novelId={novelId} />
+          </div>
+        )}
 
         {/* Main panel */}
         <main className="flex-1 overflow-auto">{children}</main>
