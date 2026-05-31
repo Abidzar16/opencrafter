@@ -7,22 +7,24 @@
 
 ## Right Now
 
-Between tasks — last completed **1.1 Story Structure CRUD**.
+Between tasks — last completed **1.6 Create from Outline**.
 
 ## Next Up
 
-1. **1.2 Grid View (Kanban)** — Kanban layout, scene cards, card configurator, keyword search
-2. **1.3 Outline View** — Linear list, inline scene summary edit, beat list, collapse/expand
-3. **1.4 Scene Details Panel** — Detail side panel, beat list editor, label system
-4. **1.5 Scene & Plan Actions** — Action menus for scene/chapter/act
-5. **1.6 Create from Outline** — Text parser, preview step, preset templates
+1. **2.1 Tiptap Editor Core** `[BLOCKER]` — install Tiptap, core editor wrapper, content persistence, word count, multi-scene view
+2. **2.2 Custom Tiptap Extensions** `[BLOCKER]` — Beat node, Section node, SlashMenu, CodexHighlight shell
+3. **2.3 Editor UI** — format menu bar, inline formatting, focus mode, scene details panel (Write side), story timeline
+4. **2.4 Autosave Infrastructure** `[CROSS-CUTTING]` — `useDebouncedSave`, wire save-indicator
+5. **2.5 Revision History — Write** `[CROSS-CUTTING]` — `useRevision` hook, snapshot pruning, version history modal
 
 ## Recently Completed
 
-- **1.1 Story Structure CRUD** — PlanBoard with Act/Chapter/Scene create, inline rename (double-click), duplicate (deep copy), archive, restore, permanent delete, move (scene→chapter, chapter→act pickers), and drag-and-drop reorder at all three levels using @dnd-kit/core.
-- **0.7 Data Backup & Docker** — Full IndexedDB JSON backup/restore, Dockerfile, nginx.conf, docker-compose.yml with ANTHROPIC proxy gate, CI workflow.
-- **0.6 Novel Library** — Cover grid, CreateNovelDialog, NovelCard, NovelSettingsModal, archive/delete, series grouping.
-- **0.5 TanStack Router & App Shell** — File-based routes, NovelShell, Zustand stores, SaveIndicator.
+- **1.6 Create from Outline** — Collapsible panel with `#`/`##` text parser, preview step, append-to-novel flow, 8 preset templates (3 Act, Save the Cat, Hero's Journey, Freytag's Pyramid, Story Circle, Fichtean Curve, Derek Murphy 24ch, Story Clock), custom input.
+- **1.5 Scene & Plan Actions** — Scene action menu (open details, subtitle, duplicate, move, archive, export, delete); chapter action menu (add/edit subtitle via dialog); act menus complete.
+- **1.4 Scene Details Panel** — Right-side Sheet with title, subtitle, summary, beat editor (DnD reorder), POV dropdown (from codex character entries), label selector, info section.
+- **1.3 Outline View** — Flat collapsible list (act → chapter → scene), inline summary textarea-edit, expandable read-only beat list, "open details" button.
+- **1.2 Grid View** — Horizontal kanban: acts as column groups, chapters as columns, scene cards with configurable width/height/field visibility (persisted in localStorage), keyword search (title+summary+beats).
+- **1.1 Story Structure CRUD** — PlanBoard with Act/Chapter/Scene create, inline rename (double-click), duplicate (deep copy), archive, restore, permanent delete, move, drag-and-drop reorder.
 
 ---
 
@@ -45,3 +47,8 @@ Between tasks — last completed **1.1 Story Structure CRUD**.
 - Plan module components live in `src/components/plan/`. Each level (act/chapter/scene) has its own DndContext for reordering within that level; cross-level moves (scene→chapter, chapter→act) use picker dialogs.
 - `InlineEdit` triggers on double-click (not single-click) to avoid accidental edits.
 - Archived items across all three levels are surfaced in `ArchivedPanel` at the bottom of PlanBoard — toggled by a collapsible row.
+- Plan module view state (`planView`, `planSearch`) lives in Zustand UIStore. Card config (width/height/field visibility) stored in localStorage under `opencrafter:plan-card-config`.
+- Scene Detail Panel uses `useEditorStore().activeSceneId` as the open/close signal. Setting `activeSceneId` to a scene ID opens the panel; setting it to `null` closes it. Works because SceneDetailPanel is only rendered in the plan route.
+- Create from Outline parser: `#` → act, `##` → chapter, plain paragraphs → scene summaries. Each paragraph line = one scene. Auto-creates Act 1 / Chapter 1 if no headers present.
+- Label colors stored as CSS hex strings; preset palette of 10 colors. Labels are per-novel (novelId FK). Scenes store label IDs in `scene.labels[]`.
+- POV dropdown in Scene Detail Panel uses `useCodexEntriesByType(novelId, CodexType.Character)` — shows "Add character entries in the Codex" hint when empty.

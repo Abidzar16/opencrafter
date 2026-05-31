@@ -163,44 +163,44 @@
 
 ### 1.2 Grid View (Kanban)
 
-- [ ] Grid view layout: acts as column groups, chapters as sub-groups, scenes as cards
-- [ ] Scene card component (title, summary excerpt, POV badge, word count, label chips)
-- [ ] Scene card dimension configurator (height + width sliders, persisted per-user in localStorage)
-- [ ] Configurable card field visibility (toggle which fields show on cards: word count, POV, labels, codex tags)
-- [ ] Codex mention badges on cards (placeholder until Codex module; count only, populated in Phase 3)
-- [ ] Keyword search bar in top nav filtering scene cards (searches title, summary, beats, labels)
+- [x] Grid view layout: acts as column groups, chapters as sub-groups, scenes as cards
+- [x] Scene card component (title, summary excerpt, POV badge, word count, label chips)
+- [x] Scene card dimension configurator (height + width sliders, persisted per-user in localStorage)
+- [x] Configurable card field visibility (toggle which fields show on cards: word count, POV, labels, codex tags)
+- [x] Codex mention badges on cards (placeholder until Codex module; count only, populated in Phase 3)
+- [x] Keyword search bar in top nav filtering scene cards (searches title, summary, beats, labels)
 
 ### 1.3 Outline View
 
-- [ ] Outline view: linear flat list grouped by act → chapter → scene
-- [ ] Scene summary inline edit in outline view
-- [ ] Beat list display per scene in outline (expandable)
-- [ ] Collapse/expand act and chapter sections
+- [x] Outline view: linear flat list grouped by act → chapter → scene
+- [x] Scene summary inline edit in outline view
+- [x] Beat list display per scene in outline (expandable)
+- [x] Collapse/expand act and chapter sections
 
 ### 1.4 Scene Details Panel
 
-- [ ] Scene detail side panel (opens on scene card click or from action menu)
-- [ ] Fields: title, subtitle, summary (textarea), beats list editor, POV character (dropdown, character codex entries only — wired up in Phase 3), word count (read-only, computed), chapter reference
-- [ ] Beat list editor: add beat, edit beat text inline, reorder beats (drag handle), delete beat
-- [ ] Label system: label CRUD per novel (name + color picker); assign/remove labels on scenes; label chips on cards
-- [ ] "Add subtitle" action for scenes and chapters
+- [x] Scene detail side panel (opens on scene card click or from action menu)
+- [x] Fields: title, subtitle, summary (textarea), beats list editor, POV character (dropdown, character codex entries only — wired up in Phase 3), word count (read-only, computed), chapter reference
+- [x] Beat list editor: add beat, edit beat text inline, reorder beats (drag handle), delete beat
+- [x] Label system: label CRUD per novel (name + color picker); assign/remove labels on scenes; label chips on cards
+- [x] "Add subtitle" action for scenes and chapters
 
 ### 1.5 Scene & Plan Actions
 
-- [ ] Scene action menu: rename, duplicate, move, archive, delete, set POV, add subtitle, export scene (basic text), add codex progression (wired in Phase 3)
+- [x] Scene action menu: rename, duplicate, move, archive, delete, set POV, add subtitle, export scene (basic text), add codex progression (wired in Phase 3)
   - "AI summarize" and "AI detect characters" stubbed out (no-op) until Phase 4
-- [ ] Chapter action menu: rename, add subtitle, duplicate, move, archive, delete
-- [ ] Act action menu: rename, duplicate, archive, delete
+- [x] Chapter action menu: rename, add subtitle, duplicate, move, archive, delete
+- [x] Act action menu: rename, duplicate, archive, delete
 
 ### 1.6 Create from Outline
 
-- [ ] "Create from Outline" panel at bottom of Plan view (collapsible)
-- [ ] Text parser: `#` → act, `##` → chapter, plain paragraphs → scene summaries
-- [ ] Preview step (show parsed structure before committing)
-- [ ] Append to existing novel (does not replace existing acts/chapters)
-- [ ] Preset template picker (8 templates: 3 Act Structure, Save the Cat, Hero's Journey, Freytag's Pyramid, Dan Harmon's Story Circle, Fichtean Curve, Derek Murphy's 24 Chapters, Story Clock)
+- [x] "Create from Outline" panel at bottom of Plan view (collapsible)
+- [x] Text parser: `#` → act, `##` → chapter, plain paragraphs → scene summaries
+- [x] Preview step (show parsed structure before committing)
+- [x] Append to existing novel (does not replace existing acts/chapters)
+- [x] Preset template picker (8 templates: 3 Act Structure, Save the Cat, Hero's Journey, Freytag's Pyramid, Dan Harmon's Story Circle, Fichtean Curve, Derek Murphy's 24 Chapters, Story Clock)
   - Each template ships as a pre-filled text in the import format
-- [ ] Custom template support (user can type or paste any `#`/`##` formatted text)
+- [x] Custom template support (user can type or paste any `#`/`##` formatted text)
 
 ---
 

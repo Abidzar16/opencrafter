@@ -2,12 +2,14 @@ import { useState } from 'react'
 import { useSortable, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { DndContext, closestCenter, type DragEndEvent } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
-import { ChevronDown, ChevronRight, GripVertical, Plus, Copy, Archive, Trash2, MoveRight } from 'lucide-react'
+import { ChevronDown, ChevronRight, GripVertical, Plus, Copy, Archive, Trash2, MoveRight, FileText } from 'lucide-react'
 import { SceneRow } from './scene-row'
 import { InlineEdit } from './inline-edit'
 import { MoveChapterDialog } from './move-dialog'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { ActionMenu } from '@/components/ui/action-menu'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import {
   useScenesByChapter,
@@ -32,6 +34,8 @@ export function ChapterSection({ chapter, novelId, sortableProps }: ChapterSecti
   const [collapsed, setCollapsed] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [moveOpen, setMoveOpen] = useState(false)
+  const [subtitleOpen, setSubtitleOpen] = useState(false)
+  const [subtitleValue, setSubtitleValue] = useState(chapter.subtitle ?? '')
 
   const scenes = useScenesByChapter(chapter.id)
   const createScene = useCreateScene()
@@ -72,6 +76,14 @@ export function ChapterSection({ chapter, novelId, sortableProps }: ChapterSecti
   }
 
   const actions = [
+    {
+      label: chapter.subtitle ? 'Edit subtitle' : 'Add subtitle',
+      icon: <FileText className="h-4 w-4" />,
+      onClick: () => {
+        setSubtitleValue(chapter.subtitle ?? '')
+        setSubtitleOpen(true)
+      },
+    },
     {
       label: 'Duplicate',
       icon: <Copy className="h-4 w-4" />,
@@ -145,6 +157,9 @@ export function ChapterSection({ chapter, novelId, sortableProps }: ChapterSecti
             onSave={title => updateChapter(chapter.id, { title })}
             className="text-sm font-medium"
           />
+          {chapter.subtitle && (
+            <p className="text-xs text-muted-foreground italic truncate">{chapter.subtitle}</p>
+          )}
         </div>
 
         <span className="text-muted-foreground text-xs">{activeScenes.length}s</span>
@@ -203,6 +218,38 @@ export function ChapterSection({ chapter, novelId, sortableProps }: ChapterSecti
         }}
         onClose={() => setMoveOpen(false)}
       />
+
+      {/* Subtitle dialog */}
+      <Dialog open={subtitleOpen} onOpenChange={v => setSubtitleOpen(v)}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>{chapter.subtitle ? 'Edit Subtitle' : 'Add Subtitle'}</DialogTitle>
+          </DialogHeader>
+          <Input
+            value={subtitleValue}
+            onChange={e => setSubtitleValue(e.target.value)}
+            placeholder="Chapter subtitle…"
+            onKeyDown={e => {
+              if (e.key === 'Enter') {
+                updateChapter(chapter.id, { subtitle: subtitleValue.trim() || undefined })
+                setSubtitleOpen(false)
+              }
+            }}
+          />
+          <DialogFooter>
+            <Button variant="outline" size="sm" onClick={() => setSubtitleOpen(false)}>Cancel</Button>
+            <Button
+              size="sm"
+              onClick={() => {
+                updateChapter(chapter.id, { subtitle: subtitleValue.trim() || undefined })
+                setSubtitleOpen(false)
+              }}
+            >
+              Save
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

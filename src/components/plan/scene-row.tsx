@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { GripVertical, Copy, Archive, Trash2, MoveRight } from 'lucide-react'
+import { GripVertical, Copy, Archive, Trash2, MoveRight, FileText, ExternalLink } from 'lucide-react'
 import { InlineEdit } from './inline-edit'
 import { MoveSceneDialog } from './move-dialog'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
@@ -12,12 +12,30 @@ import {
   useDuplicateScene,
   useMoveScene,
 } from '@/lib/db/hooks'
+import { useEditorStore } from '@/stores/editor-store'
 import { toast } from 'sonner'
 import type { Scene } from '@/types'
 
 interface SceneRowProps {
   scene: Scene
   novelId: string
+}
+
+function exportSceneText(scene: Scene) {
+  const lines: string[] = [scene.title]
+  if (scene.subtitle) lines.push(scene.subtitle)
+  if (scene.summary) lines.push('', scene.summary)
+  if (scene.beats.length > 0) {
+    lines.push('', 'Beats:')
+    scene.beats.forEach((b, i) => lines.push(`${i + 1}. ${b.text}`))
+  }
+  const blob = new Blob([lines.join('\n')], { type: 'text/plain' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `${scene.title.replace(/[^a-z0-9]/gi, '-').toLowerCase()}.txt`
+  a.click()
+  URL.revokeObjectURL(url)
 }
 
 export function SceneRow({ scene, novelId }: SceneRowProps) {
@@ -28,6 +46,7 @@ export function SceneRow({ scene, novelId }: SceneRowProps) {
   const deleteScene = useDeleteScene()
   const duplicateScene = useDuplicateScene()
   const moveScene = useMoveScene()
+  const { setActiveScene } = useEditorStore()
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: scene.id,
@@ -40,6 +59,16 @@ export function SceneRow({ scene, novelId }: SceneRowProps) {
   }
 
   const actions = [
+    {
+      label: 'Open details',
+      icon: <ExternalLink className="h-4 w-4" />,
+      onClick: () => setActiveScene(scene.id),
+    },
+    {
+      label: scene.subtitle ? 'Edit subtitle' : 'Add subtitle',
+      icon: <FileText className="h-4 w-4" />,
+      onClick: () => setActiveScene(scene.id),
+    },
     {
       label: 'Duplicate',
       icon: <Copy className="h-4 w-4" />,
@@ -60,6 +89,11 @@ export function SceneRow({ scene, novelId }: SceneRowProps) {
         updateScene(scene.id, { archived: true })
         toast.success('Scene archived')
       },
+    },
+    {
+      label: 'Export scene',
+      icon: <FileText className="h-4 w-4" />,
+      onClick: () => exportSceneText(scene),
     },
     {
       label: 'Delete',
@@ -90,6 +124,9 @@ export function SceneRow({ scene, novelId }: SceneRowProps) {
           onSave={title => updateScene(scene.id, { title })}
           className="text-sm font-medium"
         />
+        {scene.subtitle && (
+          <p className="text-muted-foreground mt-0.5 truncate text-xs italic">{scene.subtitle}</p>
+        )}
         {scene.summary && (
           <p className="text-muted-foreground mt-0.5 truncate text-xs">{scene.summary}</p>
         )}
