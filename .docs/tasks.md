@@ -49,48 +49,48 @@
 
 ### 0.3 Dexie Schema & Hooks `[BLOCKER]`
 
-- [ ] Install Dexie.js v4
-- [ ] `src/lib/db/schema.ts` — Dexie class definition with all tables and indexes matching plan §3
+- [x] Install Dexie.js v4
+- [x] `src/lib/db/schema.ts` — Dexie class definition with all tables and indexes matching plan §3
   - Tables: novels, series, acts, chapters, scenes, scene_content, codex_entries, codex_relations, codex_progressions, snippets, chat_threads, chat_messages, prompts, prompt_components, prompt_personas, prompt_presets, model_configs, api_keys, revisions, labels
   - Add compound indexes for common queries: `[novelId+order]` on acts/chapters/scenes, `[novelId+type]` on codex_entries
-- [ ] `src/lib/db/index.ts` — export singleton DB instance
-- [ ] Schema migration strategy: version 1 baseline, document how to add v2 migrations without breaking existing data
-- [ ] Dexie CRUD hooks for `novels` (`useNovels`, `useNovel`, `useCreateNovel`, `useUpdateNovel`, `useDeleteNovel`)
-- [ ] Dexie CRUD hooks for `acts`, `chapters`, `scenes` (same pattern)
-- [ ] Dexie CRUD hooks for `scene_content` (`useSceneContent`, `useSaveSceneContent`)
-- [ ] Dexie CRUD hooks for `codex_entries`, `codex_relations`, `codex_progressions`
-- [ ] Dexie CRUD hooks for `snippets`, `chat_threads`, `chat_messages`
-- [ ] Dexie CRUD hooks for `prompts`, `prompt_components`, `prompt_personas`, `prompt_presets`, `model_configs`, `api_keys`
-- [ ] Dexie CRUD hooks for `revisions`, `labels`
-- [ ] `useOrderedItems` utility hook — reusable drag-and-drop order persistence (updates `order` field on a list of items)
+- [x] `src/lib/db/index.ts` — export singleton DB instance
+- [x] Schema migration strategy: version 1 baseline, document how to add v2 migrations without breaking existing data
+- [x] Dexie CRUD hooks for `novels` (`useNovels`, `useNovel`, `useCreateNovel`, `useUpdateNovel`, `useDeleteNovel`)
+- [x] Dexie CRUD hooks for `acts`, `chapters`, `scenes` (same pattern)
+- [x] Dexie CRUD hooks for `scene_content` (`useSceneContent`, `useSaveSceneContent`)
+- [x] Dexie CRUD hooks for `codex_entries`, `codex_relations`, `codex_progressions`
+- [x] Dexie CRUD hooks for `snippets`, `chat_threads`, `chat_messages`
+- [x] Dexie CRUD hooks for `prompts`, `prompt_components`, `prompt_personas`, `prompt_presets`, `model_configs`, `api_keys`
+- [x] Dexie CRUD hooks for `revisions`, `labels`
+- [x] `useOrderedItems` utility hook — reusable drag-and-drop order persistence (updates `order` field on a list of items)
 
 ### 0.4 UI Infrastructure `[CROSS-CUTTING]`
 
-- [ ] Toast notification system (`src/components/ui/toast-provider.tsx` wrapping shadcn Sonner or custom)
+- [x] Toast notification system (`src/components/ui/toast-provider.tsx` wrapping shadcn Sonner or custom)
   - Variants: success, error, info, warning
   - `useToast()` hook
-- [ ] Confirmation dialog component (`src/components/ui/confirm-dialog.tsx`)
+- [x] Confirmation dialog component (`src/components/ui/confirm-dialog.tsx`)
   - Props: title, description, confirmLabel, onConfirm, destructive flag
   - Used for all delete/archive/overwrite actions
-- [ ] Kebab action menu component (`src/components/ui/action-menu.tsx`)
+- [x] Kebab action menu component (`src/components/ui/action-menu.tsx`)
   - Generic: takes `actions[]` array with label, icon, onClick, destructive flag
   - All major entities use this pattern
-- [ ] Empty state component (`src/components/ui/empty-state.tsx`)
+- [x] Empty state component (`src/components/ui/empty-state.tsx`)
   - Props: icon, title, description, optional call-to-action
-- [ ] Loading spinner + skeleton components
-- [ ] Cover image upload component (`src/components/ui/image-upload.tsx`)
+- [x] Loading spinner + skeleton components
+- [x] Cover image upload component (`src/components/ui/image-upload.tsx`)
   - Reads file → converts to base64/Blob → stores in Dexie
   - Used for novels and codex entries
-- [ ] Revision history modal (`src/components/ui/revision-history-modal.tsx`) `[CROSS-CUTTING]`
+- [x] Revision history modal (`src/components/ui/revision-history-modal.tsx`) `[CROSS-CUTTING]`
   - Props: entityType, entityId
   - Lists past versions with timestamps, preview pane, restore button
   - Reads from `revisions` table via `useLiveQuery`
 
 ### 0.5 TanStack Router & App Shell `[BLOCKER]`
 
-- [ ] Install TanStack Router v1, configure file-based routing
-- [ ] Root route (`src/app/__root.tsx`): provides DB context, Zustand context, toast provider
-- [ ] Routes:
+- [x] Install TanStack Router v1, configure file-based routing
+- [x] Root route (`src/routes/__root.tsx`): provides DB context, Zustand context, toast provider
+- [x] Routes:
   - `/` — Novel library
   - `/novel/$novelId` — Novel shell (layout with sidebar + topbar)
   - `/novel/$novelId/plan` — Plan module
@@ -99,43 +99,43 @@
   - `/novel/$novelId/review` — Review placeholder
   - `/settings` — Global settings (API keys, model collections, prompt library)
   - `*` — 404 page
-- [ ] Zustand stores (`src/stores/`):
+- [x] Zustand stores (`src/stores/`):
   - `useUIStore` — sidebar visibility, active panel, modal states, focus mode
   - `useEditorStore` — active novel/act/chapter/scene, cursor position
   - `useAIStore` — generation status, active stream, abort controller
-- [ ] Three-region layout component (`src/components/layout/novel-shell.tsx`)
+- [x] Three-region layout component (`src/components/layout/novel-shell.tsx`)
   - Left sidebar (icons: Codex, Snippets, Prompt Library, Export)
   - Top navigation bar (mode switcher: Plan / Write / Chat / Review; view selector; keyword filter)
   - Main panel
   - Sidebar collapse/expand behavior
-- [ ] Mode switcher component (Plan/Write/Chat/Review tabs in top bar)
-- [ ] Novel navigation header (top-left: back to library, novel settings button, collapse sidebar)
-- [ ] Autosave indicator component (`src/components/layout/save-indicator.tsx`)
+- [x] Mode switcher component (Plan/Write/Chat/Review tabs in top bar)
+- [x] Novel navigation header (top-left: back to library, novel settings button, collapse sidebar)
+- [x] Autosave indicator component (`src/components/layout/save-indicator.tsx`)
   - States: idle/saving/saved/error with visual feedback
   - Subscribe to `useUIStore.saveStatus`
 
 ### 0.6 Novel Library
 
-- [ ] Novel library page (`/`) with responsive cover grid
-- [ ] Create novel dialog (title, optional cover image, optional series assignment)
-- [ ] Novel card component (cover image, title, last-edited timestamp, "shared" badge placeholder)
-- [ ] Novel settings modal (title, description, cover image, persona assignment, default prompts)
-- [ ] Delete novel with confirmation (permanent; warn about data loss)
-- [ ] Archive novel; archived novels tab in library
-- [ ] Series grouping: series header row in library grid, novels grouped under their series
-- [ ] Series CRUD (basic: create, rename, delete series; full series home screen deferred to Phase 8)
+- [x] Novel library page (`/`) with responsive cover grid
+- [x] Create novel dialog (title, optional cover image, optional series assignment)
+- [x] Novel card component (cover image, title, last-edited timestamp, "shared" badge placeholder)
+- [x] Novel settings modal (title, description, cover image, persona assignment, default prompts)
+- [x] Delete novel with confirmation (permanent; warn about data loss)
+- [x] Archive novel; archived novels tab in library
+- [x] Series grouping: series header row in library grid, novels grouped under their series
+- [x] Series CRUD (basic: create, rename, delete series; full series home screen deferred to Phase 8)
 
 ### 0.7 Data Backup & Docker
 
-- [ ] **Export all data as JSON** — one-click backup of entire IndexedDB to a `.json` file
+- [x] **Export all data as JSON** — one-click backup of entire IndexedDB to a `.json` file
   - Iterate all Dexie tables, serialize to JSON, trigger browser download
   - This is a safety feature: IndexedDB wipe = total loss
-- [ ] **Import from JSON backup** — restore all tables from a backup file (with clear warning: overwrites all current data)
-- [ ] `Dockerfile` (multi-stage: Node 22 builder → nginx:alpine serve)
-- [ ] `nginx.conf` — SPA routing (all paths → `index.html`), optional Anthropic CORS proxy block
-- [ ] `docker-compose.yml` — `ENABLE_ANTHROPIC_PROXY` env var gates the proxy
-- [ ] `nginx.conf` Anthropic proxy block: `location /api/anthropic-proxy/ { proxy_pass https://api.anthropic.com/; }` (only added when env var is true)
-- [ ] `.github/workflows/ci.yml` — lint, typecheck, Vitest on push/PR
+- [x] **Import from JSON backup** — restore all tables from a backup file (with clear warning: overwrites all current data)
+- [x] `Dockerfile` (multi-stage: Node 22 builder → nginx:alpine serve)
+- [x] `nginx.conf` — SPA routing (all paths → `index.html`), optional Anthropic CORS proxy block
+- [x] `docker-compose.yml` — `ENABLE_ANTHROPIC_PROXY` env var gates the proxy
+- [x] `nginx.conf` Anthropic proxy block: `location /api/anthropic-proxy/ { proxy_pass https://api.anthropic.com/; }` (only added when env var is true)
+- [x] `.github/workflows/ci.yml` — lint, typecheck, Vitest on push/PR
 
 ---
 

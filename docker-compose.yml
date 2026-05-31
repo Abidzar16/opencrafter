@@ -1,0 +1,9 @@
+services:
+  opencrafter:
+    build: .
+    ports:
+      - "3000:80"
+    environment:
+      # Set to "true" to enable the nginx Anthropic CORS proxy
+      ENABLE_ANTHROPIC_PROXY: "false"
+    restart: unless-stopped
