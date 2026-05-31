@@ -1,29 +1,28 @@
 # Opencrafter — Status
 
 **Last updated:** 2026-05-31
-**Phase:** 0 — Foundation (complete)
+**Phase:** 1 — Plan Module (in progress)
 
 ---
 
 ## Right Now
 
-Between tasks — last completed **0.7 Data Backup & Docker**. Phase 0 is fully done.
+Between tasks — last completed **1.1 Story Structure CRUD**.
 
 ## Next Up
 
-1. **1.1 Story Structure CRUD** — Act/Chapter/Scene create, inline rename, duplicate, archive, delete, move, reorder
-2. **1.2 Grid View (Kanban)** — Kanban layout, scene cards, card configurator, keyword search
-3. **1.3 Outline View** — Linear list, inline scene summary edit, beat list, collapse/expand
-4. **1.4 Scene Details Panel** — Detail side panel, beat list editor, label system
-5. **1.5 Scene & Plan Actions** — Action menus for scene/chapter/act
+1. **1.2 Grid View (Kanban)** — Kanban layout, scene cards, card configurator, keyword search
+2. **1.3 Outline View** — Linear list, inline scene summary edit, beat list, collapse/expand
+3. **1.4 Scene Details Panel** — Detail side panel, beat list editor, label system
+4. **1.5 Scene & Plan Actions** — Action menus for scene/chapter/act
+5. **1.6 Create from Outline** — Text parser, preview step, preset templates
 
 ## Recently Completed
 
-- **0.3 Dexie Schema & Hooks** — `src/lib/db/schema.ts` with all 20 tables + compound indexes; singleton `db.ts`; CRUD hooks split into hooks/novels.ts, hooks/structure.ts, hooks/scene-content.ts, hooks/codex.ts, hooks/snippets.ts, hooks/chat.ts, hooks/prompts.ts, hooks/revisions.ts, hooks/labels.ts, hooks/ordered-items.ts.
-- **0.4 UI Infrastructure** — ToastProvider (Sonner), ConfirmDialog, ActionMenu, EmptyState, Spinner, ImageUpload (base64), RevisionHistoryModal; shadcn/ui components installed (Button, Dialog, DropdownMenu, Input, Textarea, Select, Badge, Separator, ScrollArea, Tooltip, Sheet, Tabs, Skeleton, Label).
-- **0.5 TanStack Router & App Shell** — File-based routing in `src/routes/`; root layout with TooltipProvider + ToastProvider; all routes wired (/, /novel/$novelId, plan/write/chat/review, /settings, 404); three Zustand stores (useUIStore, useEditorStore, useAIStore); NovelShell three-region layout (icon sidebar + topbar mode switcher + main panel); SaveIndicator.
-- **0.6 Novel Library** — Responsive cover-grid library page; CreateNovelDialog (title + cover + series); NovelCard (cover, title, timestamp, action menu); NovelSettingsModal; archive/unarchive/delete with ConfirmDialog; SeriesSection (collapse, rename, delete); series grouping in grid.
-- **0.7 Data Backup & Docker** — `src/lib/backup/export.ts` + `import.ts` (full IndexedDB JSON dump/restore); Dockerfile (Node 22 builder → nginx:alpine); nginx.conf (SPA fallback, optional Anthropic proxy); docker-compose.yml (`ENABLE_ANTHROPIC_PROXY` gate); nginx-entrypoint.sh (env-driven proxy block); `.github/workflows/ci.yml` (lint + typecheck + test + build).
+- **1.1 Story Structure CRUD** — PlanBoard with Act/Chapter/Scene create, inline rename (double-click), duplicate (deep copy), archive, restore, permanent delete, move (scene→chapter, chapter→act pickers), and drag-and-drop reorder at all three levels using @dnd-kit/core.
+- **0.7 Data Backup & Docker** — Full IndexedDB JSON backup/restore, Dockerfile, nginx.conf, docker-compose.yml with ANTHROPIC proxy gate, CI workflow.
+- **0.6 Novel Library** — Cover grid, CreateNovelDialog, NovelCard, NovelSettingsModal, archive/delete, series grouping.
+- **0.5 TanStack Router & App Shell** — File-based routes, NovelShell, Zustand stores, SaveIndicator.
 
 ---
 
@@ -42,3 +41,7 @@ Between tasks — last completed **0.7 Data Backup & Docker**. Phase 0 is fully 
 - TanStack Router routes live in `src/routes/` (not `src/app/` as originally planned). Vite plugin + `pnpm exec tsr generate` produces `src/routeTree.gen.ts`. Route paths must use exact string literals (no template literals) for type safety.
 - DB singleton in `src/lib/db/db.ts` to avoid circular imports between `db/index.ts` and hooks.
 - Backup lives in `src/lib/backup/` — export.ts iterates all Dexie tables to JSON; import.ts clears + bulkAdds within a transaction.
+- `@dnd-kit/core` + `@dnd-kit/sortable` + `@dnd-kit/utilities` installed for drag-and-drop.
+- Plan module components live in `src/components/plan/`. Each level (act/chapter/scene) has its own DndContext for reordering within that level; cross-level moves (scene→chapter, chapter→act) use picker dialogs.
+- `InlineEdit` triggers on double-click (not single-click) to avoid accidental edits.
+- Archived items across all three levels are surfaced in `ArchivedPanel` at the bottom of PlanBoard — toggled by a collapsible row.

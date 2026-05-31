@@ -145,21 +145,21 @@
 
 ### 1.1 Story Structure CRUD
 
-- [ ] Act creation (inline "Add Act" button at end of list)
-- [ ] Chapter creation (inline inside act, "Add Chapter")
-- [ ] Scene creation (inline inside chapter, "Add Scene")
-- [ ] Inline rename for acts, chapters, scenes (click title to edit in-place)
-- [ ] Duplicate act (deep copy: act + all children)
-- [ ] Duplicate chapter (deep copy: chapter + all scenes)
-- [ ] Duplicate scene (copy scene metadata + content)
-- [ ] Archive act / chapter / scene (hidden from main view, restorable)
-- [ ] Archived items view (toggle to show archived; restore or permanently delete from there)
-- [ ] Permanently delete act / chapter / scene (with confirmation dialog)
-- [ ] Move scene between chapters (drag-and-drop and/or action menu → "Move to chapter…" picker)
-- [ ] Move chapter between acts
-- [ ] Drag-and-drop scene reorder within chapter (`@dnd-kit/core`)
-- [ ] Drag-and-drop chapter reorder within act
-- [ ] Drag-and-drop act reorder
+- [x] Act creation (inline "Add Act" button at end of list)
+- [x] Chapter creation (inline inside act, "Add Chapter")
+- [x] Scene creation (inline inside chapter, "Add Scene")
+- [x] Inline rename for acts, chapters, scenes (click title to edit in-place)
+- [x] Duplicate act (deep copy: act + all children)
+- [x] Duplicate chapter (deep copy: chapter + all scenes)
+- [x] Duplicate scene (copy scene metadata + content)
+- [x] Archive act / chapter / scene (hidden from main view, restorable)
+- [x] Archived items view (toggle to show archived; restore or permanently delete from there)
+- [x] Permanently delete act / chapter / scene (with confirmation dialog)
+- [x] Move scene between chapters (drag-and-drop and/or action menu → "Move to chapter…" picker)
+- [x] Move chapter between acts
+- [x] Drag-and-drop scene reorder within chapter (`@dnd-kit/core`)
+- [x] Drag-and-drop chapter reorder within act
+- [x] Drag-and-drop act reorder
 
 ### 1.2 Grid View (Kanban)
 
