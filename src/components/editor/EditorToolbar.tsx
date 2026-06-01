@@ -19,7 +19,9 @@ import {
   Heading1,
   Heading2,
   Heading3,
+  Wand2,
 } from 'lucide-react'
+import { OPEN_GENERATION_PANEL_EVENT, type GenerationPanelEventDetail } from './extensions/slash-menu'
 
 interface EditorToolbarProps {
   editor: Editor | null
@@ -145,6 +147,36 @@ export function EditorToolbar({ editor, focusMode, onToggleFocusMode }: EditorTo
       <ToolBtn tooltip="Justify" active={editor.isActive({ textAlign: 'justify' })} onClick={() => editor.chain().focus().setTextAlign('justify').run()}>
         <AlignJustify className="h-3.5 w-3.5" />
       </ToolBtn>
+
+      <Separator orientation="vertical" className="mx-1 h-5" />
+
+      {/* AI rewrite — visible when text is selected */}
+      {editor.state.selection.content().size > 0 && (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 gap-1.5 px-2 text-xs"
+              onClick={() => {
+                const { from, to } = editor.state.selection
+                const selectedText = editor.state.doc.textBetween(from, to, ' ')
+                const detail: GenerationPanelEventDetail = {
+                  mode: 'replacement',
+                  sourceText: selectedText,
+                  selectionFrom: from,
+                  selectionTo: to,
+                }
+                document.dispatchEvent(new CustomEvent(OPEN_GENERATION_PANEL_EVENT, { detail }))
+              }}
+            >
+              <Wand2 className="h-3.5 w-3.5" />
+              Rewrite
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Rewrite selected text with AI</TooltipContent>
+        </Tooltip>
+      )}
 
       <div className="flex-1" />
 

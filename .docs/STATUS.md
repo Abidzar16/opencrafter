@@ -1,25 +1,29 @@
 # Opencrafter — Status
 
 **Last updated:** 2026-06-01
-**Phase:** 3 — Codex Module (tasks 3.1–3.7 complete — Phase 3 done)
+**Phase:** 4 — AI Layer (tasks 4.1–4.5 complete — Phase 4 done)
 
 ---
 
 ## Right Now
 
-Between tasks — last completed **3.7 Quick Create & Pinning**. Phase 3 complete.
+Between tasks — last completed **4.5 NeverInclude Enforcement**. Phase 4 complete.
 
 ## Next Up
 
-1. **4.1 Provider Infrastructure** — `AIProvider` interface, SSE stream util, OpenAI/Anthropic/Groq/Ollama/LMStudio/OpenRouter/Generic provider adapters, provider registry.
-2. **4.2 API Key Management** — Settings page "AI Connections" tab, per-provider key CRUD, test connection button.
-3. **4.3 Model Collections** — Model config CRUD, per-model fields (temp/top-p/max tokens), thinking mode toggle.
-4. **4.4 Streaming Prose Generation** — Beat completion flow, `useGenerateStream` hook, text replacement flow.
-5. **4.5 Never Include Enforcement** — `filterNeverIncludeEntries`, test coverage, debug preview utility.
+1. **5.1 Prompt Library UI** — Two-panel Settings layout (list + detail editor), prompt CRUD, grouping, default prompts.
+2. **5.2 Prompt Editor (5 tabs)** — General / Instructions / Context / Inputs / Model Settings tabs.
+3. **5.3 Prompt Template Engine** — `template-engine.ts`, placeholder resolution, message array assembly.
+4. **5.4 Prompt Components & Personas** — Component CRUD, insert picker, persona CRUD + assignment.
+5. **5.5 Presets & Defaults** — Preset CRUD, default prompts, import/export.
 
 ## Recently Completed
 
-- **3.7 Quick Create & Pinning** — `QuickCreateCodexDialog` (name/type/description, auto-associates to active scene); `/new codex entry` slash menu item dispatching `OPEN_QUICK_CREATE_CODEX_EVENT`; Pin button in CodexSidebar header (`codexPinned` in UIStore); NovelShell shows codex panel when pinned regardless of `activePanel`; `showCodexAssociations` field in `CardConfig`; `BookOpen` count badge on scene cards.
+- **4.5 NeverInclude Enforcement** — `filterNeverIncludeEntries()` extracted as named pure function; 13 tests in `context-builder.test.ts` (including 3 NeverInclude-specific cases); `debugBuildAIContext()` returns included+excluded with reasons for Phase 5 Prompt Preview.
+- **4.4 Streaming Prose Generation** — `useGenerateStream` hook (AbortController + AIStore integration); `GenerationPanel` Sheet (model selector, context summary, streaming preview, Apply/Apply as section/Retry/Discard); slash menu "Generate from beat" item dispatches `OPEN_GENERATION_PANEL_EVENT`; EditorToolbar "Rewrite" button (visible on text selection); MultiSceneView listens for event + renders panel.
+- **4.3 Model Collections** — `ModelCollectionsTab` with full CRUD (provider, model ID, API key ref, temp/topP/maxTokens, Anthropic thinking toggle+budget); expandable detail rows; missing-key warning badge.
+- **4.2 API Key Management** — `AIConnectionsTab` with per-provider cards (configured/unconfigured badges); Add/Edit dialog (key input, base URL, test connection); test connection calls provider APIs; Settings page with tabs.
+- **4.1 Provider Infrastructure** — `AIProvider` interface; SSE stream parser (OpenAI + Anthropic formats, 11 tests); 7 provider adapters (OpenAI, Anthropic, Groq, Ollama, LMStudio, OpenRouter, Generic); `generate()` registry function with Dexie key resolution + AbortSignal threading.
 - **3.6 Codex Relations** — Relations tab (add typed link, free-text or preset types, inbound display via `toId` query). Fixed: removed duplicate backlink auto-creation; inbound section naturally shows incoming links via DB query without separate records. "Referenced entry in AI context" checkbox deferred to Phase 6.
 - **3.5 Codex Progressions** — `ProgressionPicker` dialog from slash menu (`/codex progression`); `ProgressionBadge` inline annotations with tooltip; Progressions tab in EntryEditor (list + inline edit/delete); `useCodexProgressionsByScene` hook; wired into `buildAIContext`.
 - **3.4 Tracking & AI Context** — Tracking tab in EntryEditor (enable toggle, case-sensitive, exclusion list chips, AI context mode, NeverInclude warning). `buildAIContext()` in `src/lib/ai/context-builder.ts` + `renderContextBlocks()` helper.

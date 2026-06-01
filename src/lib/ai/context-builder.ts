@@ -12,6 +12,19 @@ export interface ContextBlock {
   appliedProgressions: CodexProgression[]
 }
 
+export interface DebugContextResult {
+  included: ContextBlock[]
+  excluded: Array<{ entryId: string; name: string; reason: string }>
+}
+
+/**
+ * Hard filter: removes all NeverInclude entries unconditionally.
+ * Applied before any other inclusion logic and before any provider call.
+ */
+export function filterNeverIncludeEntries(entries: CodexEntry[]): CodexEntry[] {
+  return entries.filter(e => e.aiContextMode !== AiContextMode.NeverInclude)
+}
+
 /**
  * Assembles the codex context for an AI call.
  *
@@ -32,10 +45,8 @@ export async function buildAIContext(
 ): Promise<ContextBlock[]> {
   const allEntries = await db.codex_entries.where('novelId').equals(novelId).toArray()
 
-  // Hard filter: NeverInclude
-  const eligible: CodexEntry[] = allEntries.filter(
-    e => e.aiContextMode !== AiContextMode.NeverInclude,
-  )
+  // Hard filter: NeverInclude — must apply before anything else
+  const eligible: CodexEntry[] = filterNeverIncludeEntries(allEntries)
 
   // Run detector on selected text for IncludeWhenDetected / NotWhenDetected logic
   const trackedEntries = eligible
@@ -124,6 +135,66 @@ export function renderContextBlocks(blocks: ContextBlock[]): string {
       return lines.join('\n')
     })
     .join('\n\n')
+}
+
+/**
+ * Debug variant of buildAIContext.
+ * Returns both the included blocks AND the entries that were excluded, with the reason for exclusion.
+ * Used by Prompt Preview (Phase 5) to show users exactly what is and isn't sent to the AI.
+ */
+export async function debugBuildAIContext(
+  novelId: string,
+  sceneId: string | null,
+  selectedText: string,
+  manualEntryIds: string[] = [],
+): Promise<DebugContextResult> {
+  const allEntries = await db.codex_entries.where('novelId').equals(novelId).toArray()
+  const neverIncluded = allEntries.filter(e => e.aiContextMode === AiContextMode.NeverInclude)
+  const excluded: DebugContextResult['excluded'] = neverIncluded.map(e => ({
+    entryId: e.id,
+    name: e.name,
+    reason: 'NeverInclude — always filtered out',
+  }))
+
+  const eligible = filterNeverIncludeEntries(allEntries)
+
+  const trackedEntries = eligible
+    .filter(e => e.trackingSettings.enabled)
+    .map(e => ({
+      entryId: e.id,
+      name: e.name,
+      aliases: e.aliases,
+      trackingSettings: e.trackingSettings,
+    }))
+
+  const detectedIds = new Set(
+    selectedText.trim()
+      ? detect(selectedText, trackedEntries).map(m => m.entryId)
+      : [],
+  )
+
+  const manualSet = new Set(manualEntryIds)
+
+  eligible.forEach(e => {
+    if (manualSet.has(e.id)) return // included via manual override, not excluded
+    let reason: string | null = null
+    switch (e.aiContextMode) {
+      case AiContextMode.IncludeWhenDetected:
+        if (!detectedIds.has(e.id)) reason = 'IncludeWhenDetected — name not found in selected text'
+        break
+      case AiContextMode.NotWhenDetected:
+        if (detectedIds.has(e.id)) reason = 'NotWhenDetected — name detected in selected text'
+        break
+      case AiContextMode.AlwaysInclude:
+        break
+      default:
+        reason = `Unknown mode: ${e.aiContextMode}`
+    }
+    if (reason) excluded.push({ entryId: e.id, name: e.name, reason })
+  })
+
+  const included = await buildAIContext(novelId, sceneId, selectedText, manualEntryIds)
+  return { included, excluded }
 }
 
 function extractPlainText(json: Record<string, unknown>): string {

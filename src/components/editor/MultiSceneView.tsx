@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useScenesByChapter, useTrackedEntries } from '@/lib/db/hooks'
 import { Editor } from './Editor'
 import { EmptyState } from '@/components/ui/empty-state'
@@ -6,9 +6,17 @@ import { useCodexHoverCard } from '@/components/codex/CodexHoverCard'
 import { ProgressionPicker } from '@/components/codex/ProgressionPicker'
 import { ProgressionBadge } from '@/components/codex/ProgressionBadge'
 import { QuickCreateCodexDialog } from '@/components/codex/QuickCreateCodexDialog'
-import { OPEN_PROGRESSION_PICKER_EVENT, OPEN_QUICK_CREATE_CODEX_EVENT } from './extensions/slash-menu'
+import { GenerationPanel } from './GenerationPanel'
+import {
+  OPEN_PROGRESSION_PICKER_EVENT,
+  OPEN_QUICK_CREATE_CODEX_EVENT,
+  OPEN_GENERATION_PANEL_EVENT,
+  type GenerationPanelEventDetail,
+} from './extensions/slash-menu'
 import { useUIStore } from '@/stores/ui-store'
+import type { Editor as TiptapEditor } from '@tiptap/core'
 import { PenLine } from 'lucide-react'
+import type { useEditor } from '@tiptap/react'
 
 export type SceneDividerStyle = 'line' | 'asterisks' | 'blank' | 'custom'
 
@@ -53,6 +61,12 @@ export function MultiSceneView({
   const [progressionPickerOpen, setProgressionPickerOpen] = useState(false)
   const [quickCreateOpen, setQuickCreateOpen] = useState(false)
 
+  // Generation panel state
+  const [generationPanelOpen, setGenerationPanelOpen] = useState(false)
+  const [generationDetail, setGenerationDetail] = useState<GenerationPanelEventDetail | null>(null)
+  // Map of sceneId → Tiptap editor instance (populated via onEditorReady)
+  const editorsRef = useRef<Map<string, ReturnType<typeof useEditor>>>(new Map())
+
   // Open codex sidebar on entry click from hover card
   const openEntry = (id: string) => {
     setActivePanel('codex')
@@ -73,6 +87,17 @@ export function MultiSceneView({
     const handler = () => { setQuickCreateOpen(true) }
     document.addEventListener(OPEN_QUICK_CREATE_CODEX_EVENT, handler)
     return () => document.removeEventListener(OPEN_QUICK_CREATE_CODEX_EVENT, handler)
+  }, [])
+
+  // Listen for generation panel open event
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent<GenerationPanelEventDetail>).detail
+      setGenerationDetail(detail)
+      setGenerationPanelOpen(true)
+    }
+    document.addEventListener(OPEN_GENERATION_PANEL_EVENT, handler)
+    return () => document.removeEventListener(OPEN_GENERATION_PANEL_EVENT, handler)
   }, [])
 
   // Auto-select first scene when chapter changes
@@ -116,6 +141,7 @@ export function MultiSceneView({
               novelId={novelId}
               trackedEntries={trackedEntries}
               onWordCountChange={count => onWordCountChange?.(scene.id, count)}
+              onEditorReady={ed => editorsRef.current.set(scene.id, ed)}
             />
 
             {index < activeScenes.length - 1 && (
@@ -140,6 +166,30 @@ export function MultiSceneView({
         sceneId={activeSceneForProgression}
         onClose={() => setQuickCreateOpen(false)}
       />
+
+      {generationPanelOpen && generationDetail && (
+        <GenerationPanel
+          open={generationPanelOpen}
+          onClose={() => {
+            setGenerationPanelOpen(false)
+            setGenerationDetail(null)
+          }}
+          novelId={novelId}
+          sceneId={activeSceneForProgression ?? activeScenes[0]?.id ?? ''}
+          mode={generationDetail.mode}
+          sourceText={generationDetail.sourceText}
+          editor={
+            (activeSceneForProgression
+              ? editorsRef.current.get(activeSceneForProgression)
+              : editorsRef.current.values().next().value) as TiptapEditor | null
+          }
+          selectionRange={
+            generationDetail.mode === 'replacement'
+              ? { from: generationDetail.selectionFrom, to: generationDetail.selectionTo }
+              : undefined
+          }
+        />
+      )}
     </>
   )
 }

@@ -3,11 +3,19 @@ import Suggestion, { type SuggestionOptions } from '@tiptap/suggestion'
 import { ReactRenderer } from '@tiptap/react'
 import tippy, { type Instance as TippyInstance } from 'tippy.js'
 import { forwardRef, useEffect, useImperativeHandle, useState } from 'react'
-import { Swords, Layers, BookMarked, BookPlus, ChevronRight } from 'lucide-react'
+import { Swords, Layers, BookMarked, BookPlus, Wand2, ChevronRight } from 'lucide-react'
 import type { Editor } from '@tiptap/core'
 
 export const OPEN_PROGRESSION_PICKER_EVENT = 'openCodexProgressionPicker'
 export const OPEN_QUICK_CREATE_CODEX_EVENT = 'openQuickCreateCodex'
+export const OPEN_GENERATION_PANEL_EVENT = 'openGenerationPanel'
+
+export interface GenerationPanelEventDetail {
+  mode: 'beat' | 'replacement'
+  sourceText: string
+  selectionFrom: number
+  selectionTo: number
+}
 
 export interface SlashMenuItem {
   title: string
@@ -58,6 +66,24 @@ export const SLASH_MENU_ITEMS: SlashMenuItem[] = [
     command: (_e) => {
       void _e
       document.dispatchEvent(new CustomEvent(OPEN_QUICK_CREATE_CODEX_EVENT))
+    },
+  },
+  {
+    title: 'Generate from beat',
+    description: 'Use AI to write prose from the current beat',
+    icon: <Wand2 className="h-4 w-4" />,
+    command: (editor) => {
+      const { state } = editor
+      const { selection } = state
+      const node = selection.$anchor.node()
+      const beatContent = node.type.name === 'beat' ? node.textContent : ''
+      const detail: GenerationPanelEventDetail = {
+        mode: 'beat',
+        sourceText: beatContent,
+        selectionFrom: selection.from,
+        selectionTo: selection.to,
+      }
+      document.dispatchEvent(new CustomEvent(OPEN_GENERATION_PANEL_EVENT, { detail }))
     },
   },
 ]

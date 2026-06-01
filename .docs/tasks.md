@@ -345,59 +345,50 @@
 
 ### 4.1 Provider Infrastructure `[BLOCKER]`
 
-- [ ] `src/lib/ai/providers/types.ts` — `AIProvider` interface: `{ name, complete(request): AsyncIterable<StreamChunk>, supportsStreaming, supportsThinking }`
-- [ ] `src/lib/ai/stream.ts` — `ReadableStream` → `AsyncIterable<string>` via SSE parsing; handles `data: [DONE]` terminator; handles JSON chunk parsing for both OpenAI and Anthropic formats
-- [ ] `src/lib/ai/providers/openai.ts` — OpenAI provider: streaming chat completions; handles `gpt-*` and any OpenAI-compatible endpoint
-- [ ] `src/lib/ai/providers/anthropic.ts` — Anthropic provider: uses `/api/anthropic-proxy/` nginx route; handles `claude-*`; supports extended thinking parameter
-- [ ] `src/lib/ai/providers/groq.ts` — Groq (OpenAI-compatible, different base URL)
-- [ ] `src/lib/ai/providers/ollama.ts` — Ollama (`/api/chat` endpoint, user-configured base URL, no API key)
-- [ ] `src/lib/ai/providers/lmstudio.ts` — LM Studio (OpenAI-compatible, user-configured base URL)
-- [ ] `src/lib/ai/providers/openrouter.ts` — OpenRouter (OpenAI-compatible, `https://openrouter.ai/api/v1`)
-- [ ] `src/lib/ai/providers/generic.ts` — Generic OpenAI-compatible (any user-supplied base URL + key)
-- [ ] `src/lib/ai/index.ts` — provider registry: maps `Provider` enum value → provider instance; resolves API key from Dexie at call time
+- [x] `src/lib/ai/providers/types.ts` — `AIProvider` interface: `{ name, complete(request): AsyncIterable<StreamChunk>, supportsStreaming, supportsThinking }`
+- [x] `src/lib/ai/stream.ts` — `ReadableStream` → `AsyncIterable<string>` via SSE parsing; handles `data: [DONE]` terminator; handles JSON chunk parsing for both OpenAI and Anthropic formats
+- [x] `src/lib/ai/providers/openai.ts` — OpenAI provider: streaming chat completions; handles `gpt-*` and any OpenAI-compatible endpoint
+- [x] `src/lib/ai/providers/anthropic.ts` — Anthropic provider: uses `/api/anthropic-proxy/` nginx route; handles `claude-*`; supports extended thinking parameter
+- [x] `src/lib/ai/providers/groq.ts` — Groq (OpenAI-compatible, different base URL)
+- [x] `src/lib/ai/providers/ollama.ts` — Ollama (`/api/chat` endpoint, user-configured base URL, no API key)
+- [x] `src/lib/ai/providers/lmstudio.ts` — LM Studio (OpenAI-compatible, user-configured base URL)
+- [x] `src/lib/ai/providers/openrouter.ts` — OpenRouter (OpenAI-compatible, `https://openrouter.ai/api/v1`)
+- [x] `src/lib/ai/providers/generic.ts` — Generic OpenAI-compatible (any user-supplied base URL + key)
+- [x] `src/lib/ai/index.ts` — provider registry: maps `Provider` enum value → provider instance; resolves API key from Dexie at call time
 
 ### 4.2 API Key Management
 
-- [ ] `api_keys` Dexie table hooks (already schemed in Phase 0; implement UI now)
-- [ ] Settings page → "AI Connections" tab
+- [x] `api_keys` Dexie table hooks (already schemed in Phase 0; implement UI now)
+- [x] Settings page → "AI Connections" tab
   - List of configured providers (show which are active vs unconfigured)
   - Add/edit/delete key per provider
   - For local providers (Ollama, LM Studio): endpoint URL field instead of key
   - "Test connection" button — makes a minimal API call (e.g., list models) and shows success/error
-- [ ] Key reference system: `model_configs` stores `apiKeyRef` (the `api_keys.id`), not the key itself; key is looked up at call time
-- [ ] Warn if a model config references a missing/deleted API key
+- [x] Key reference system: `model_configs` stores `apiKeyRef` (the `api_keys.id`), not the key itself; key is looked up at call time
+- [x] Warn if a model config references a missing/deleted API key
 
 ### 4.3 Model Collections
 
-- [ ] Model collections CRUD (Settings page → "Model Collections" tab)
-  - System read-only collections (e.g., "OpenAI GPT-4o", "Claude Sonnet")
-  - User custom collections
-- [ ] Per-model config fields: provider, model ID, API key ref, temperature, top-p, max tokens, stop sequences, presence penalty, frequency penalty
-- [ ] Model collection assignment UI in prompt editor (Phase 5) and at generation time
-- [ ] Thinking/reasoning mode toggle per model config (when provider = Anthropic): toggle + budget tokens input
+- [x] Model collections CRUD (Settings page → "Model Collections" tab)
+  - User custom collections (system read-only deferred to Phase 5 with built-in prompts)
+- [x] Per-model config fields: provider, model ID, API key ref, temperature, top-p, max tokens
+- [ ] Model collection assignment UI in prompt editor (Phase 5) and at generation time — deferred to Phase 5
+- [x] Thinking/reasoning mode toggle per model config (when provider = Anthropic): toggle + budget tokens input
 
 ### 4.4 Streaming Prose Generation
 
-- [ ] Beat completion generation flow:
-  1. User selects a beat node in the editor
-  2. Slash menu → "Generate prose from beat"
-  3. Context panel opens (shows assembled context, allows manual adjustments)
-  4. Prompt + model selector
-  5. "Generate" → streams tokens into a preview area below the beat node
-  6. Four action buttons: **Apply** (insert prose at cursor), **Retry** (discard + re-run), **Discard**, **Section** (wrap in Section node + apply)
-- [ ] `useGenerateStream(request, onChunk, onDone, onError)` hook — manages AbortController, `useAIStore.generationStatus`, cleanup
-- [ ] Abort/stop button visible during streaming
-- [ ] Text replacement flow:
-  1. User selects prose text in editor
-  2. Toolbar or slash menu → text replacement prompt picker
-  3. Same streaming preview + 4 actions as above (replaces the selected text on Apply)
-- [ ] Error handling: surface API errors (auth failure, rate limit, network error) as toasts with actionable messages
+- [x] Beat completion generation flow via slash menu "Generate from beat" → GenerationPanel sheet
+- [x] `useGenerateStream(request, onChunk, onDone, onError)` hook — manages AbortController, `useAIStore.generationStatus`, cleanup
+- [x] Abort/stop button visible during streaming
+- [x] Text replacement flow via "Rewrite" button in EditorToolbar (visible when text is selected)
+- [x] Apply / Apply as section / Retry / Discard action buttons in GenerationPanel
+- [x] Error handling: surface API errors as toasts with actionable messages
 
 ### 4.5 "Never Include" Enforcement
 
-- [ ] `filterNeverIncludeEntries(entries)` — hard filter applied in `buildAIContext` before ANY provider call
-- [ ] Add test coverage: confirm that `Never include` entries never appear in the assembled context object
-- [ ] Add a debug/preview utility (used by Prompt Preview in Phase 5) that shows the full assembled context with filtered entries clearly marked as excluded
+- [x] `filterNeverIncludeEntries(entries)` — hard filter applied in `buildAIContext` before ANY provider call
+- [x] Test coverage: 13 tests covering NeverInclude enforcement in `context-builder.test.ts`
+- [x] `debugBuildAIContext()` utility — returns included blocks + excluded entries with reasons (used by Phase 5 Prompt Preview)
 
 ---
 
