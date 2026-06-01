@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
-import { Wand2, Square, RotateCcw, Check, X, Layers } from 'lucide-react'
+import { Wand2, Square, RotateCcw, Check, X, Layers, Eye } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Badge } from '@/components/ui/badge'
@@ -13,13 +13,34 @@ import {
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Separator } from '@/components/ui/separator'
 import { toast } from 'sonner'
-import { useModelConfigs, useApiKeys } from '@/lib/db/hooks'
-import { buildAIContext, renderContextBlocks } from '@/lib/ai/context-builder'
+import {
+  useModelConfigs,
+  useApiKeys,
+  usePrompts,
+  usePromptPresets,
+  useCreatePromptPreset,
+  useDeletePromptPreset,
+} from '@/lib/db/hooks'
 import { useGenerateStream } from '@/lib/hooks/use-generate-stream'
 import { useAIStore } from '@/stores/ai-store'
-import { Provider } from '@/types'
-import type { ModelConfig } from '@/types'
+import { resolvePrompt } from '@/lib/ai/template-engine'
+import { PromptPreviewModal } from './PromptPreviewModal'
+import { Provider, PromptType } from '@/types'
+import type { ModelConfig, Prompt } from '@/types'
 import type { Editor } from '@tiptap/core'
+import db from '@/lib/db/db'
+
+const DEFAULTS_KEY = 'opencrafter:account-defaults'
+
+function loadAccountDefault(key: string): string | undefined {
+  try {
+    const raw = localStorage.getItem(DEFAULTS_KEY)
+    if (!raw) return undefined
+    return (JSON.parse(raw) as Record<string, string>)[key]
+  } catch {
+    return undefined
+  }
+}
 
 export type GenerationMode = 'beat' | 'replacement'
 
@@ -37,30 +58,6 @@ interface GenerationPanelProps {
   selectionRange?: { from: number; to: number }
 }
 
-function buildSystemPrompt(
-  mode: GenerationMode,
-  contextStr: string,
-): string {
-  const contextBlock = contextStr
-    ? `\n\n## Story Context\n${contextStr}`
-    : ''
-
-  if (mode === 'beat') {
-    return `You are a skilled fiction writer. Generate vivid, engaging prose for the beat instruction provided by the user.
-Return only the prose — no preamble, no explanation, no meta-commentary.${contextBlock}`
-  }
-
-  return `You are a skilled fiction editor. Rewrite the passage provided by the user while preserving the core meaning and narrative intent.
-Return only the rewritten text — no preamble, no explanation.${contextBlock}`
-}
-
-function buildUserPrompt(mode: GenerationMode, sourceText: string): string {
-  if (mode === 'beat') {
-    return `Beat instruction: ${sourceText}\n\nWrite the prose for this beat.`
-  }
-  return `Original:\n${sourceText}\n\nRewrite this passage.`
-}
-
 export function GenerationPanel({
   open,
   onClose,
@@ -73,30 +70,78 @@ export function GenerationPanel({
 }: GenerationPanelProps) {
   const configs = useModelConfigs() ?? []
   const apiKeys = useApiKeys() ?? []
+  const allPrompts = usePrompts() ?? []
   const { status } = useAIStore()
 
+  const promptType = mode === 'beat' ? PromptType.BeatCompletion : PromptType.TextReplacement
+  const typedPrompts = allPrompts.filter(p => p.type === promptType)
+
   const [selectedConfigId, setSelectedConfigId] = useState<string>('')
-  const [contextStr, setContextStr] = useState<string>('')
+  const [selectedPromptId, setSelectedPromptId] = useState<string>('')
+  const [contextSummary, setContextSummary] = useState<string>('')
   const [generatedText, setGeneratedText] = useState<string>('')
   const [phase, setPhase] = useState<'idle' | 'generating' | 'done'>('idle')
+  const [previewOpen, setPreviewOpen] = useState(false)
   const previewRef = useRef<HTMLDivElement>(null)
 
-  // Pick first available model on open
-  useEffect(() => {
-    if (open && !selectedConfigId && configs.length > 0) {
-      setSelectedConfigId(configs[0].id)
-    }
-  }, [open, configs, selectedConfigId])
+  const presets = usePromptPresets(selectedPromptId) ?? []
+  const createPreset = useCreatePromptPreset()
+  const deletePreset = useDeletePromptPreset()
 
-  // Assemble context when panel opens
+  async function handleSavePreset() {
+    if (!selectedPromptId || !selectedConfigId) return
+    const name = `Preset ${presets.length + 1}`
+    await createPreset({ promptId: selectedPromptId, name, modelConfigId: selectedConfigId, inputDefaults: {} })
+    toast.success('Preset saved')
+  }
+
+  function applyPreset(presetId: string) {
+    const preset = presets.find(p => p.id === presetId)
+    if (!preset) return
+    if (preset.modelConfigId) setSelectedConfigId(preset.modelConfigId)
+  }
+
+  // Pick defaults on open
   useEffect(() => {
     if (!open) return
-    buildAIContext(novelId, sceneId, sourceText)
-      .then(blocks => setContextStr(renderContextBlocks(blocks)))
-      .catch(() => setContextStr(''))
-  }, [open, novelId, sceneId, sourceText])
 
-  // Reset when closed or source changes
+    if (!selectedConfigId && configs.length > 0) {
+      setSelectedConfigId(configs[0].id)
+    }
+
+    if (!selectedPromptId) {
+      // Try novel-level default, then account default, then first available
+      async function pickDefaultPrompt() {
+        const novel = await db.novels.get(novelId)
+        const novelDefault =
+          mode === 'beat'
+            ? novel?.settings?.defaultBeatCompletionPromptId
+            : novel?.settings?.defaultTextReplacementPromptId
+        const accountDefault = loadAccountDefault(
+          mode === 'beat' ? 'defaultBeatCompletionPromptId' : 'defaultTextReplacementPromptId',
+        )
+        const fallbackId = typedPrompts[0]?.id
+        const id = novelDefault ?? accountDefault ?? fallbackId ?? ''
+        if (id) setSelectedPromptId(id)
+      }
+      pickDefaultPrompt().catch(console.error)
+    }
+  }, [open, configs, typedPrompts, selectedConfigId, selectedPromptId, novelId, mode])
+
+  // Assemble context summary when panel opens
+  useEffect(() => {
+    if (!open || !selectedPromptId) return
+    const prompt = allPrompts.find(p => p.id === selectedPromptId)
+    if (!prompt) return
+
+    resolvePrompt(prompt, { novelId, sceneId, selectedText: sourceText })
+      .then(r => {
+        const blockCount = r.contextBlocks.length
+        setContextSummary(blockCount > 0 ? `${blockCount} context block(s) assembled` : 'No context blocks')
+      })
+      .catch(() => setContextSummary(''))
+  }, [open, selectedPromptId, allPrompts, novelId, sceneId, sourceText])
+
   useEffect(() => {
     if (!open) {
       setGeneratedText('')
@@ -104,7 +149,6 @@ export function GenerationPanel({
     }
   }, [open])
 
-  // Auto-scroll preview to bottom
   useEffect(() => {
     if (previewRef.current) {
       previewRef.current.scrollTop = previewRef.current.scrollHeight
@@ -125,30 +169,58 @@ export function GenerationPanel({
   })
 
   const selectedConfig = configs.find(c => c.id === selectedConfigId)
+  const selectedPrompt = allPrompts.find(p => p.id === selectedPromptId) ?? null
 
   const handleGenerate = async () => {
     if (!selectedConfig) {
       toast.error('Select a model config first')
       return
     }
+    if (!selectedPrompt) {
+      toast.error('Select a prompt first')
+      return
+    }
 
-    const systemContent = buildSystemPrompt(mode, contextStr)
-    const userContent = buildUserPrompt(mode, sourceText)
+    // Resolve persona
+    let personaInstructions: string | undefined
+    try {
+      const novel = await db.novels.get(novelId)
+      const personaId = novel?.settings?.defaultPersonaId
+      if (personaId) {
+        const persona = await db.prompt_personas.get(personaId)
+        personaInstructions = persona?.instructions
+      }
+    } catch { /* ignore */ }
+
+    const resolved = await resolvePrompt(selectedPrompt, {
+      novelId,
+      sceneId,
+      selectedText: sourceText,
+      personaInstructions,
+    })
+
+    // Append user message for beat/replacement source if not already in messages
+    const messages = resolved.messages
+    const hasUserMsg = messages.some(m => m.role === 'user')
+    if (!hasUserMsg && sourceText) {
+      messages.push({ role: 'user', content: sourceText })
+    }
+
+    // Apply prompt-level model settings overrides
+    const temp = selectedPrompt.modelSettings.temperature ?? selectedConfig.temperature
+    const maxTok = selectedPrompt.modelSettings.maxTokens ?? selectedConfig.maxTokens
 
     setGeneratedText('')
     setPhase('generating')
 
     await run({
-      messages: [
-        { role: 'system', content: systemContent },
-        { role: 'user', content: userContent },
-      ],
+      messages,
       provider: selectedConfig.provider as Provider,
       modelId: selectedConfig.modelId,
       apiKeyRef: selectedConfig.apiKeyRef,
-      temperature: selectedConfig.temperature,
+      temperature: temp,
       topP: selectedConfig.topP,
-      maxTokens: selectedConfig.maxTokens,
+      maxTokens: maxTok,
       stream: true,
     })
   }
@@ -163,7 +235,6 @@ export function GenerationPanel({
         .insertContentAt(selectionRange.from, generatedText)
         .run()
     } else {
-      // Beat mode: insert after the current position
       editor.chain().focus().insertContent(generatedText).run()
     }
     onClose()
@@ -211,162 +282,253 @@ export function GenerationPanel({
   }
 
   const configsWithKeys = configs.filter(c => {
-    if (!c.apiKeyRef) return true // local provider, no key needed
+    if (!c.apiKeyRef) return true
     return apiKeys.some(k => k.id === c.apiKeyRef)
   })
 
+  const previewCtx = {
+    novelId,
+    sceneId,
+    selectedText: sourceText,
+  }
+
   return (
-    <Sheet open={open} onOpenChange={v => !v && handleDiscard()}>
-      <SheetContent side="bottom" className="h-[65vh] flex flex-col p-0">
-        <SheetHeader className="px-4 pt-4 pb-2 border-b">
-          <SheetTitle className="flex items-center gap-2 text-base">
-            <Wand2 className="h-4 w-4" />
-            {mode === 'beat' ? 'Generate prose from beat' : 'Rewrite selection'}
-          </SheetTitle>
-        </SheetHeader>
+    <>
+      <Sheet open={open} onOpenChange={v => !v && handleDiscard()}>
+        <SheetContent side="bottom" className="h-[65vh] flex flex-col p-0">
+          <SheetHeader className="px-4 pt-4 pb-2 border-b">
+            <SheetTitle className="flex items-center gap-2 text-base">
+              <Wand2 className="h-4 w-4" />
+              {mode === 'beat' ? 'Generate prose from beat' : 'Rewrite selection'}
+            </SheetTitle>
+          </SheetHeader>
 
-        <div className="flex flex-1 min-h-0 divide-x">
-          {/* Left: Config */}
-          <div className="w-64 shrink-0 flex flex-col gap-3 p-4 overflow-y-auto">
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                Model
-              </label>
-              {configsWithKeys.length === 0 ? (
-                <p className="text-xs text-muted-foreground">
-                  No model configs. Add one in Settings → Model Collections.
-                </p>
-              ) : (
-                <Select value={selectedConfigId} onValueChange={setSelectedConfigId}>
-                  <SelectTrigger className="h-8 text-sm">
-                    <SelectValue placeholder="Select model…" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {configsWithKeys.map((c: ModelConfig) => (
-                      <SelectItem key={c.id} value={c.id}>
-                        {c.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-            </div>
-
-            {selectedConfig && (
-              <div className="text-xs text-muted-foreground space-y-0.5">
-                <div>{selectedConfig.provider} / {selectedConfig.modelId}</div>
-                {selectedConfig.temperature !== undefined && (
-                  <div>temp {selectedConfig.temperature}</div>
+          <div className="flex flex-1 min-h-0 divide-x">
+            {/* Left: Config */}
+            <div className="w-72 shrink-0 flex flex-col gap-3 p-4 overflow-y-auto">
+              {/* Prompt selector */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                  Prompt
+                </label>
+                {typedPrompts.length === 0 ? (
+                  <p className="text-xs text-muted-foreground">
+                    No prompts for this type. Add one in Settings → Prompt Library.
+                  </p>
+                ) : (
+                  <Select value={selectedPromptId} onValueChange={setSelectedPromptId}>
+                    <SelectTrigger className="h-8 text-sm">
+                      <SelectValue placeholder="Select prompt…" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {typedPrompts.map((p: Prompt) => (
+                        <SelectItem key={p.id} value={p.id}>
+                          {p.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+                {selectedPrompt?.description && (
+                  <p className="text-xs text-muted-foreground">{selectedPrompt.description}</p>
                 )}
               </div>
-            )}
 
-            <Separator />
-
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                Context ({contextStr ? `${contextStr.length} chars` : 'none'})
-              </label>
-              {contextStr ? (
-                <div className="text-xs text-muted-foreground bg-muted rounded p-2 max-h-32 overflow-y-auto whitespace-pre-wrap">
-                  {contextStr}
-                </div>
-              ) : (
-                <p className="text-xs text-muted-foreground">No codex context assembled.</p>
-              )}
-            </div>
-
-            <Separator />
-
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                Source
-              </label>
-              <div className="text-xs text-muted-foreground bg-muted rounded p-2 max-h-24 overflow-y-auto line-clamp-6">
-                {sourceText || '(empty)'}
+              {/* Model selector */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                  Model
+                </label>
+                {configsWithKeys.length === 0 ? (
+                  <p className="text-xs text-muted-foreground">
+                    No model configs. Add one in Settings → Model Collections.
+                  </p>
+                ) : (
+                  <Select value={selectedConfigId} onValueChange={setSelectedConfigId}>
+                    <SelectTrigger className="h-8 text-sm">
+                      <SelectValue placeholder="Select model…" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {configsWithKeys.map((c: ModelConfig) => (
+                        <SelectItem key={c.id} value={c.id}>
+                          {c.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+                {selectedConfig && (
+                  <div className="text-xs text-muted-foreground space-y-0.5">
+                    <div>{selectedConfig.provider} / {selectedConfig.modelId}</div>
+                    {selectedConfig.temperature !== undefined && (
+                      <div>temp {selectedConfig.temperature}</div>
+                    )}
+                  </div>
+                )}
               </div>
-            </div>
-          </div>
 
-          {/* Right: Preview + Actions */}
-          <div className="flex-1 flex flex-col min-h-0">
-            <div
-              ref={previewRef}
-              className="flex-1 overflow-y-auto p-4 font-serif text-sm leading-relaxed whitespace-pre-wrap"
-            >
-              {generatedText || (
-                <span className="text-muted-foreground italic">
-                  {phase === 'idle'
-                    ? 'Click Generate to create prose…'
-                    : 'Generating…'}
-                </span>
-              )}
-              {phase === 'generating' && (
-                <span className="inline-block h-4 w-0.5 bg-foreground animate-pulse ml-0.5" />
-              )}
-            </div>
-
-            <div className="border-t p-3 flex items-center gap-2">
-              {phase === 'idle' && (
-                <Button
-                  onClick={handleGenerate}
-                  disabled={!selectedConfig || status === 'generating'}
-                  size="sm"
-                >
-                  <Wand2 className="mr-2 h-4 w-4" />
-                  Generate
-                </Button>
-              )}
-
-              {phase === 'generating' && (
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => {
-                    abort()
-                    setPhase('done')
-                  }}
-                >
-                  <Square className="mr-2 h-3 w-3 fill-current" />
-                  Stop
-                </Button>
-              )}
-
-              {phase === 'done' && (
+              {/* Presets */}
+              {presets.length > 0 && (
                 <>
-                  <Button size="sm" onClick={handleApply}>
-                    <Check className="mr-2 h-4 w-4" />
-                    Apply
-                  </Button>
-                  <Button size="sm" variant="secondary" onClick={handleSection}>
-                    <Layers className="mr-2 h-4 w-4" />
-                    Apply as section
-                  </Button>
-                  <Button size="sm" variant="outline" onClick={handleRetry}>
-                    <RotateCcw className="mr-2 h-4 w-4" />
-                    Retry
-                  </Button>
-                  <Button size="sm" variant="ghost" onClick={handleDiscard}>
-                    <X className="mr-2 h-4 w-4" />
-                    Discard
-                  </Button>
+                  <Separator />
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                      Presets
+                    </label>
+                    <div className="flex flex-col gap-1">
+                      {presets.map(preset => (
+                        <div key={preset.id} className="flex items-center gap-1">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex-1 h-7 text-xs justify-start"
+                            onClick={() => applyPreset(preset.id)}
+                          >
+                            {preset.name}
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 text-destructive hover:text-destructive shrink-0"
+                            onClick={() => deletePreset(preset.id)}
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </>
               )}
 
-              <div className="ml-auto">
-                {phase === 'generating' && (
-                  <Badge variant="secondary" className="text-xs">Streaming…</Badge>
-                )}
-                {phase === 'done' && generatedText && (
-                  <span className="text-xs text-muted-foreground">
-                    {generatedText.split(/\s+/).filter(Boolean).length} words
+              <Separator />
+
+              {/* Context summary */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                    Context
+                  </label>
+                  <div className="flex gap-1">
+                    {selectedPrompt && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 text-xs px-2"
+                        onClick={() => setPreviewOpen(true)}
+                      >
+                        <Eye className="mr-1 h-3 w-3" />
+                        Preview
+                      </Button>
+                    )}
+                    {selectedPromptId && selectedConfigId && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 text-xs px-2"
+                        onClick={handleSavePreset}
+                      >
+                        Save preset
+                      </Button>
+                    )}
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground">{contextSummary || 'No context.'}</p>
+              </div>
+
+              <Separator />
+
+              {/* Source */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                  Source
+                </label>
+                <div className="text-xs text-muted-foreground bg-muted rounded p-2 max-h-24 overflow-y-auto line-clamp-6">
+                  {sourceText || '(empty)'}
+                </div>
+              </div>
+            </div>
+
+            {/* Right: Preview + Actions */}
+            <div className="flex-1 flex flex-col min-h-0">
+              <div
+                ref={previewRef}
+                className="flex-1 overflow-y-auto p-4 font-serif text-sm leading-relaxed whitespace-pre-wrap"
+              >
+                {generatedText || (
+                  <span className="text-muted-foreground italic">
+                    {phase === 'idle' ? 'Click Generate to create prose…' : 'Generating…'}
                   </span>
                 )}
+                {phase === 'generating' && (
+                  <span className="inline-block h-4 w-0.5 bg-foreground animate-pulse ml-0.5" />
+                )}
+              </div>
+
+              <div className="border-t p-3 flex items-center gap-2">
+                {phase === 'idle' && (
+                  <Button
+                    onClick={handleGenerate}
+                    disabled={!selectedConfig || !selectedPrompt || status === 'generating'}
+                    size="sm"
+                  >
+                    <Wand2 className="mr-2 h-4 w-4" />
+                    Generate
+                  </Button>
+                )}
+
+                {phase === 'generating' && (
+                  <Button variant="destructive" size="sm" onClick={() => { abort(); setPhase('done') }}>
+                    <Square className="mr-2 h-3 w-3 fill-current" />
+                    Stop
+                  </Button>
+                )}
+
+                {phase === 'done' && (
+                  <>
+                    <Button size="sm" onClick={handleApply}>
+                      <Check className="mr-2 h-4 w-4" />
+                      Apply
+                    </Button>
+                    <Button size="sm" variant="secondary" onClick={handleSection}>
+                      <Layers className="mr-2 h-4 w-4" />
+                      Apply as section
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={handleRetry}>
+                      <RotateCcw className="mr-2 h-4 w-4" />
+                      Retry
+                    </Button>
+                    <Button size="sm" variant="ghost" onClick={handleDiscard}>
+                      <X className="mr-2 h-4 w-4" />
+                      Discard
+                    </Button>
+                  </>
+                )}
+
+                <div className="ml-auto">
+                  {phase === 'generating' && (
+                    <Badge variant="secondary" className="text-xs">Streaming…</Badge>
+                  )}
+                  {phase === 'done' && generatedText && (
+                    <span className="text-xs text-muted-foreground">
+                      {generatedText.split(/\s+/).filter(Boolean).length} words
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </SheetContent>
-    </Sheet>
+        </SheetContent>
+      </Sheet>
+
+      {selectedPrompt && (
+        <PromptPreviewModal
+          open={previewOpen}
+          onClose={() => setPreviewOpen(false)}
+          prompt={selectedPrompt}
+          ctx={previewCtx}
+        />
+      )}
+    </>
   )
 }

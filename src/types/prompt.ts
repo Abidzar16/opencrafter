@@ -48,6 +48,7 @@ export interface Prompt {
   contextConfig: ContextBlockConfig[]
   inputs: PromptInput[]
   modelSettings: PromptModelSettings
+  modelConfigIds?: string[]
   groupId?: string
   readOnly: boolean
   createdAt: number

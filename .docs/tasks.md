@@ -398,11 +398,11 @@
 
 ### 5.1 Prompt Library UI
 
-- [ ] Prompt library page (Settings → "Prompt Library"): two-panel layout (left: list; right: detail editor)
-- [ ] Prompt list: grouped by type, searchable by name, filterable by type
-- [ ] Prompt CRUD: create (pick type first), edit, delete (with confirmation), duplicate
+- [x] Prompt library page (Settings → "Prompt Library"): two-panel layout (left: list; right: detail editor)
+- [x] Prompt list: grouped by type, searchable by name, filterable by type
+- [x] Prompt CRUD: create (pick type first), edit, delete (with confirmation), duplicate
 - [ ] Prompt grouping: assign prompts to named submenus (for cleaner dropdowns in generation UI)
-- [ ] Ship with a set of built-in default prompts for all 4 types (ready to use on first run):
+- [x] Ship with a set of built-in default prompts for all 4 types (ready to use on first run):
   - Scene Beat Completion: "Continue the scene from the beat below…"
   - Scene Summarization: "Summarize the following scene in ~80 words…"
   - Text Replacement (x3): Expand, Shorten, Increase Tension
@@ -410,50 +410,50 @@
 
 ### 5.2 Prompt Editor (5 tabs)
 
-- [ ] **General tab**: name, type (locked after create), assigned model collections (multi-select), description (helper text shown to users in generation UI)
-- [ ] **Instructions tab**: system prompt textarea with placeholder variable syntax (e.g., `{{scene_summary}}`, `{{codex_context}}`); insert-component picker button
-- [ ] **Context tab**: checklist of context blocks to include (scene content, scene summary, beats, prior text, codex, snippets); drag to reorder; per-block toggle
-- [ ] **Inputs tab**: define dynamic user-facing input fields
+- [x] **General tab**: name, type (locked after create), assigned model collections (multi-select), description (helper text shown to users in generation UI)
+- [x] **Instructions tab**: system prompt textarea with placeholder variable syntax (e.g., `{{scene_summary}}`, `{{codex_context}}`); insert-component picker button
+- [x] **Context tab**: checklist of context blocks to include (scene content, scene summary, beats, prior text, codex, snippets); drag to reorder; per-block toggle
+- [x] **Inputs tab**: define dynamic user-facing input fields
   - Add/edit/delete fields
   - Field types: text, textarea, dropdown (with options list), toggle
   - Default value per field
   - `key` (used as `{{key}}` placeholder in instructions)
-- [ ] **Model Settings tab**: temperature, max tokens (override model collection defaults for this prompt)
+- [x] **Model Settings tab**: temperature, max tokens (override model collection defaults for this prompt)
 
 ### 5.3 Prompt Template Engine `[BLOCKER for generation]`
 
-- [ ] `src/lib/ai/template-engine.ts` — resolves a prompt at generation time:
+- [x] `src/lib/ai/template-engine.ts` — resolves a prompt at generation time:
   - Substitutes `{{variable}}` placeholders with: context blocks, prompt input values, codex context, scene data
   - Assembles final message array (`[{role: "system", content: ...}, {role: "user", content: ...}]`)
   - Respects context block ordering from prompt config
-- [ ] Integration with `buildAIContext` from Phase 3: codex context block is assembled and injected as a resolved placeholder
+- [x] Integration with `buildAIContext` from Phase 3: codex context block is assembled and injected as a resolved placeholder
 
 ### 5.4 Prompt Components & Personas
 
-- [ ] Prompt components CRUD (Settings → "Prompt Library" → "Components" section)
+- [x] Prompt components CRUD (Settings → "Prompt Library" → "Components" section)
   - System read-only components (e.g., "Writing Style Guide", "Show Don't Tell Rule")
   - User custom components
   - Each component: name + content (text)
-- [ ] Insert-component picker in prompt instructions tab (inserts `{{component:name}}` placeholder; resolved at generation time)
-- [ ] Prompt personas CRUD (Settings → "Prompt Library" → "Personas" section)
+- [x] Insert-component picker in prompt instructions tab (inserts `{{component:name}}` placeholder; resolved at generation time)
+- [x] Prompt personas CRUD (Settings → "Prompt Library" → "Personas" section)
   - Fields: name, instructions text
   - Scope: account-level (default) or novel-level (overrides account)
-- [ ] Persona assignment: novel settings → "AI Persona" dropdown; applied prepended to all system prompts for that novel
+- [x] Persona assignment: novel settings → "AI Persona" dropdown; applied prepended to all system prompts for that novel
 
 ### 5.5 Presets & Defaults
 
-- [ ] Prompt presets CRUD (saved combination of prompt + model collection + input defaults)
+- [x] Prompt presets CRUD (saved combination of prompt + model collection + input defaults)
   - Create preset from current generation UI state ("Save as preset")
   - One-click apply in generation UI
-- [ ] Default prompts: Settings → "Defaults" tab
+- [x] Default prompts: Settings → "Defaults" tab
   - Account-level defaults for each prompt type (Scene Beat, Summarization, Text Replacement, Workshop Chat)
   - Novel-level overrides (in novel settings)
-- [ ] Prompt export: "Copy to clipboard" button exports prompt as JSON string
-- [ ] Prompt import: "Import from clipboard" in prompt library; parses JSON → creates new prompt
+- [x] Prompt export: "Copy to clipboard" button exports prompt as JSON string
+- [x] Prompt import: "Import from clipboard" in prompt library; parses JSON → creates new prompt
 
 ### 5.6 Prompt Preview
 
-- [ ] "Preview assembled prompt" button in generation UI and prompt editor
+- [x] "Preview assembled prompt" button in generation UI and prompt editor
   - Opens modal showing full resolved prompt (system + user messages, context blocks expanded, variables substituted)
   - Clearly marks which codex entries are included/excluded and why (e.g., "filtered: Never include")
 

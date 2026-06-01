@@ -4,6 +4,10 @@ import { createRouter, RouterProvider } from '@tanstack/react-router'
 import './index.css'
 
 import { routeTree } from './routeTree.gen'
+import { seedDefaultPrompts } from '@/lib/ai/default-prompts'
+
+// Seed built-in prompts on first run (idempotent)
+seedDefaultPrompts().catch(console.error)
 
 const router = createRouter({ routeTree })
 

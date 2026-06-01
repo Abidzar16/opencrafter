@@ -1,35 +1,30 @@
 # Opencrafter — Status
 
 **Last updated:** 2026-06-01
-**Phase:** 4 — AI Layer (tasks 4.1–4.5 complete — Phase 4 done)
+**Phase:** 5 — Prompt System (Phase 5 complete)
 
 ---
 
 ## Right Now
 
-Between tasks — last completed **4.5 NeverInclude Enforcement**. Phase 4 complete.
+Between tasks — last completed **5.6 Prompt Preview**. Phase 5 complete.
 
 ## Next Up
 
-1. **5.1 Prompt Library UI** — Two-panel Settings layout (list + detail editor), prompt CRUD, grouping, default prompts.
-2. **5.2 Prompt Editor (5 tabs)** — General / Instructions / Context / Inputs / Model Settings tabs.
-3. **5.3 Prompt Template Engine** — `template-engine.ts`, placeholder resolution, message array assembly.
-4. **5.4 Prompt Components & Personas** — Component CRUD, insert picker, persona CRUD + assignment.
-5. **5.5 Presets & Defaults** — Preset CRUD, default prompts, import/export.
+1. **6.1 Thread Management** — Chat thread sidebar, CRUD (create, rename, pin, archive, delete), "New chat" shortcut.
+2. **6.2 Chat Interface** — Message list (markdown AI messages), streaming token display, stop button, copy/delete/regenerate.
+3. **6.3 Context Selector & Message Bar** — Novel text / snippets / codex context selector, prompt picker, model picker.
+4. **6.4 Extract Feature** — Extract codex entries / plan chapters / scene beats from AI messages.
+5. **6.5 Thread Export & Split View** — Export thread as .md/.txt, split view alongside Plan or Write.
 
 ## Recently Completed
 
-- **4.5 NeverInclude Enforcement** — `filterNeverIncludeEntries()` extracted as named pure function; 13 tests in `context-builder.test.ts` (including 3 NeverInclude-specific cases); `debugBuildAIContext()` returns included+excluded with reasons for Phase 5 Prompt Preview.
-- **4.4 Streaming Prose Generation** — `useGenerateStream` hook (AbortController + AIStore integration); `GenerationPanel` Sheet (model selector, context summary, streaming preview, Apply/Apply as section/Retry/Discard); slash menu "Generate from beat" item dispatches `OPEN_GENERATION_PANEL_EVENT`; EditorToolbar "Rewrite" button (visible on text selection); MultiSceneView listens for event + renders panel.
-- **4.3 Model Collections** — `ModelCollectionsTab` with full CRUD (provider, model ID, API key ref, temp/topP/maxTokens, Anthropic thinking toggle+budget); expandable detail rows; missing-key warning badge.
-- **4.2 API Key Management** — `AIConnectionsTab` with per-provider cards (configured/unconfigured badges); Add/Edit dialog (key input, base URL, test connection); test connection calls provider APIs; Settings page with tabs.
-- **4.1 Provider Infrastructure** — `AIProvider` interface; SSE stream parser (OpenAI + Anthropic formats, 11 tests); 7 provider adapters (OpenAI, Anthropic, Groq, Ollama, LMStudio, OpenRouter, Generic); `generate()` registry function with Dexie key resolution + AbortSignal threading.
-- **3.6 Codex Relations** — Relations tab (add typed link, free-text or preset types, inbound display via `toId` query). Fixed: removed duplicate backlink auto-creation; inbound section naturally shows incoming links via DB query without separate records. "Referenced entry in AI context" checkbox deferred to Phase 6.
-- **3.5 Codex Progressions** — `ProgressionPicker` dialog from slash menu (`/codex progression`); `ProgressionBadge` inline annotations with tooltip; Progressions tab in EntryEditor (list + inline edit/delete); `useCodexProgressionsByScene` hook; wired into `buildAIContext`.
-- **3.4 Tracking & AI Context** — Tracking tab in EntryEditor (enable toggle, case-sensitive, exclusion list chips, AI context mode, NeverInclude warning). `buildAIContext()` in `src/lib/ai/context-builder.ts` + `renderContextBlocks()` helper.
-- **3.3 Codex Highlights** — `codex-detection-plugin.ts` (ProseMirror DecorationSet, requestIdleCallback debounce, meta-transaction so autosave skipped); `CodexHoverCard.tsx` (portal, mouseover listener, entry name/type/excerpt); mention count updates to DB.
-- **3.2 Detection Engine** — `src/lib/codex-detector/index.ts` (regex alternation, word boundaries, auto-plurals, exclusion overlap, longest-match-wins); 17 unit tests passing; `useTrackedEntries` hook.
-- **3.1 Codex Entry Management** — `CodexSidebar` (grouped by type, collapsible sections, search, new-entry button); `EntryEditor` (4-tab Sheet: General/Relations/Tracking/Progressions; alias+tag chips, Tiptap description/notes with revision history, key-value details, cover image, category); CRUD + duplicate; wired to NovelShell icon sidebar.
+- **5.6 Prompt Preview** — `PromptPreviewModal` (3-tab: Messages / Context Blocks / Codex); shows resolved system + user messages, assembled blocks with char counts, included/excluded codex entries with reasons. Triggered from GenerationPanel ("Preview" button).
+- **5.5 Presets & Defaults** — Preset save/apply/delete in GenerationPanel; `DefaultsTab` in Settings (account-level defaults per prompt type + persona, stored in localStorage); novel-level overrides in NovelSettingsModal; prompt export (copy as JSON) + import (paste from clipboard) in PromptLibraryTab.
+- **5.4 Components & Personas** — `ComponentsSection.tsx` (CRUD with inline preview of `{{component:Name}}` syntax); `PersonasSection.tsx` (CRUD with scope badge); persona assignment in NovelSettingsModal (with per-type prompt overrides).
+- **5.3 Template Engine** — `src/lib/ai/template-engine.ts`: `resolvePrompt()` assembles all enabled context blocks in order, resolves `{{component:name}}` then `{{variable}}` placeholders, prepends persona, returns `{messages, contextBlocks, resolvedSystem}`. Integrated into GenerationPanel replacing hardcoded prompts.
+- **5.2 Prompt Editor** — `PromptEditor.tsx` with 5 tabs: General (name, type badge, model config multi-select, description), Instructions (textarea + insert-variable/component popover), Context (ordered toggle list with up/down), Inputs (CRUD with dialog, types: text/textarea/dropdown/toggle), Model Settings (temperature + max tokens overrides).
+- **5.1 Prompt Library UI** — `PromptLibraryTab.tsx` two-panel layout; `PromptLibraryTab` sub-tabs (Prompts / Components / Personas); 8 built-in default prompts seeded via `seedDefaultPrompts()` in main.tsx; search + type filter; prompt CRUD + duplicate.
 
 ---
 
@@ -68,3 +63,6 @@ Between tasks — last completed **4.5 NeverInclude Enforcement**. Phase 4 compl
 - `buildAIContext` lives in `src/lib/ai/context-builder.ts` — pure async function, imports `db` directly (not a hook).
 - `RevisionEntityType.CodexDescription` for entry description revisions; `RevisionEntityType.CodexNotes` for notes revisions.
 - Codex sidebar opens as a 288px panel between the icon strip and main content in NovelShell when `activePanel === 'codex'`.
+- Prompt system: `resolvePrompt()` in `template-engine.ts` is the single entry point for all AI generation. Resolves context blocks, `{{component:name}}`, `{{variable}}` in that order, then prepends persona. GenerationPanel now calls `resolvePrompt` instead of hardcoded prompts.
+- Account-level defaults stored in localStorage under `opencrafter:account-defaults`. Novel-level overrides stored in `novel.settings.*PromptId` fields.
+- Built-in prompts seeded via `seedDefaultPrompts()` at app startup (idempotent — checks for existing readOnly prompts first).
