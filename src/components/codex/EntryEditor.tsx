@@ -684,8 +684,6 @@ function RelationsTab({ entryId, novelId }: { entryId: string; novelId: string }
   const handleAdd = async () => {
     if (!targetId || !relationType) return
     await createRelation({ fromId: entryId, toId: targetId, relationType })
-    // Create backlink
-    await createRelation({ fromId: targetId, toId: entryId, relationType })
     setTargetId('')
     setRelationType('')
     setAddOpen(false)

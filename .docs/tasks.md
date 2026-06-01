@@ -326,16 +326,16 @@
 
 ### 3.6 Codex Relations
 
-- [ ] Relations tab in entry editor: add typed link to another entry
-- [ ] Relation type: free-text or choose from preset list ("parent of", "child of", "ally of", "enemy of", "married to", "member of", …)
-- [ ] Bidirectional: creating A→B relation auto-creates B→A backlink (shown on B's relations tab as "incoming")
-- [ ] Referenced entry can be pulled into AI context via relation (manual checkbox in context selector)
+- [x] Relations tab in entry editor: add typed link to another entry
+- [x] Relation type: free-text or choose from preset list ("parent of", "child of", "ally of", "enemy of", "married to", "member of", …)
+- [x] Bidirectional: creating A→B relation auto-creates B→A backlink (shown on B's relations tab as "incoming")
+- [ ] Referenced entry can be pulled into AI context via relation (manual checkbox in context selector) — deferred to Phase 6
 
 ### 3.7 Quick Create & Pinning
 
-- [ ] Quick Create: `/new codex entry` in slash menu opens a minimal creation modal (name + type + description) without leaving the editor; auto-wires to current scene's codex associations
-- [ ] Sidebar pinning: "Pin" button on Codex sidebar keeps it visible alongside the main editor (CSS split-panel layout)
-- [ ] Codex entry associations on scene: track which entries are associated with each scene (stored in `scenes.codexAssociations[]`); shown as badges on scene cards
+- [x] Quick Create: `/new codex entry` in slash menu opens a minimal creation modal (name + type + description) without leaving the editor; auto-wires to current scene's codex associations
+- [x] Sidebar pinning: "Pin" button on Codex sidebar keeps it visible alongside the main editor (CSS split-panel layout)
+- [x] Codex entry associations on scene: track which entries are associated with each scene (stored in `scenes.codexAssociations[]`); shown as badges on scene cards
 
 ---
 

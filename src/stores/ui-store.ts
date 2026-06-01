@@ -7,6 +7,7 @@ export type PlanView = 'board' | 'outline' | 'grid'
 interface UIState {
   sidebarCollapsed: boolean
   activePanel: ActivePanel
+  codexPinned: boolean
   focusMode: boolean
   saveStatus: SaveStatus
   // modal visibility flags
@@ -19,6 +20,8 @@ interface UIState {
   setSidebarCollapsed: (v: boolean) => void
   toggleSidebar: () => void
   setActivePanel: (panel: ActivePanel) => void
+  setCodexPinned: (v: boolean) => void
+  toggleCodexPinned: () => void
   setFocusMode: (v: boolean) => void
   setSaveStatus: (status: SaveStatus) => void
   setNovelSettingsOpen: (v: boolean) => void
@@ -30,6 +33,7 @@ interface UIState {
 export const useUIStore = create<UIState>()(set => ({
   sidebarCollapsed: false,
   activePanel: null,
+  codexPinned: false,
   focusMode: false,
   saveStatus: 'idle',
   novelSettingsOpen: false,
@@ -40,6 +44,8 @@ export const useUIStore = create<UIState>()(set => ({
   setSidebarCollapsed: v => set({ sidebarCollapsed: v }),
   toggleSidebar: () => set(s => ({ sidebarCollapsed: !s.sidebarCollapsed })),
   setActivePanel: panel => set({ activePanel: panel }),
+  setCodexPinned: v => set({ codexPinned: v }),
+  toggleCodexPinned: () => set(s => ({ codexPinned: !s.codexPinned })),
   setFocusMode: v => set({ focusMode: v }),
   setSaveStatus: status => set({ saveStatus: status }),
   setNovelSettingsOpen: v => set({ novelSettingsOpen: v }),

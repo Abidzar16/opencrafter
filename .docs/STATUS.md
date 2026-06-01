@@ -1,22 +1,26 @@
 # Opencrafter — Status
 
-**Last updated:** 2026-05-31
-**Phase:** 3 — Codex Module (tasks 3.1–3.5 complete)
+**Last updated:** 2026-06-01
+**Phase:** 3 — Codex Module (tasks 3.1–3.7 complete — Phase 3 done)
 
 ---
 
 ## Right Now
 
-Between tasks — last completed **3.5 Codex Progressions**.
+Between tasks — last completed **3.7 Quick Create & Pinning**. Phase 3 complete.
 
 ## Next Up
 
-1. **3.6 Codex Relations** — Relations tab already implemented; bidirectional backlink auto-create is wired; need to verify inbound display. Deferred detail: "Referenced entry can be pulled into AI context via relation" checkbox in context selector (Phase 6).
-2. **3.7 Quick Create & Pinning** — `/new codex entry` slash menu item (minimal creation modal), sidebar pin button (CSS split-panel), scene codex associations badge.
-3. **Phase 4 — AI Layer** — Provider infrastructure (4.1), API key management UI (4.2), model collections (4.3), streaming prose generation (4.4), NeverInclude enforcement (4.5).
+1. **4.1 Provider Infrastructure** — `AIProvider` interface, SSE stream util, OpenAI/Anthropic/Groq/Ollama/LMStudio/OpenRouter/Generic provider adapters, provider registry.
+2. **4.2 API Key Management** — Settings page "AI Connections" tab, per-provider key CRUD, test connection button.
+3. **4.3 Model Collections** — Model config CRUD, per-model fields (temp/top-p/max tokens), thinking mode toggle.
+4. **4.4 Streaming Prose Generation** — Beat completion flow, `useGenerateStream` hook, text replacement flow.
+5. **4.5 Never Include Enforcement** — `filterNeverIncludeEntries`, test coverage, debug preview utility.
 
 ## Recently Completed
 
+- **3.7 Quick Create & Pinning** — `QuickCreateCodexDialog` (name/type/description, auto-associates to active scene); `/new codex entry` slash menu item dispatching `OPEN_QUICK_CREATE_CODEX_EVENT`; Pin button in CodexSidebar header (`codexPinned` in UIStore); NovelShell shows codex panel when pinned regardless of `activePanel`; `showCodexAssociations` field in `CardConfig`; `BookOpen` count badge on scene cards.
+- **3.6 Codex Relations** — Relations tab (add typed link, free-text or preset types, inbound display via `toId` query). Fixed: removed duplicate backlink auto-creation; inbound section naturally shows incoming links via DB query without separate records. "Referenced entry in AI context" checkbox deferred to Phase 6.
 - **3.5 Codex Progressions** — `ProgressionPicker` dialog from slash menu (`/codex progression`); `ProgressionBadge` inline annotations with tooltip; Progressions tab in EntryEditor (list + inline edit/delete); `useCodexProgressionsByScene` hook; wired into `buildAIContext`.
 - **3.4 Tracking & AI Context** — Tracking tab in EntryEditor (enable toggle, case-sensitive, exclusion list chips, AI context mode, NeverInclude warning). `buildAIContext()` in `src/lib/ai/context-builder.ts` + `renderContextBlocks()` helper.
 - **3.3 Codex Highlights** — `codex-detection-plugin.ts` (ProseMirror DecorationSet, requestIdleCallback debounce, meta-transaction so autosave skipped); `CodexHoverCard.tsx` (portal, mouseover listener, entry name/type/excerpt); mention count updates to DB.

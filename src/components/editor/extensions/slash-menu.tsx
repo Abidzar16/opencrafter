@@ -3,10 +3,11 @@ import Suggestion, { type SuggestionOptions } from '@tiptap/suggestion'
 import { ReactRenderer } from '@tiptap/react'
 import tippy, { type Instance as TippyInstance } from 'tippy.js'
 import { forwardRef, useEffect, useImperativeHandle, useState } from 'react'
-import { Swords, Layers, BookMarked, ChevronRight } from 'lucide-react'
+import { Swords, Layers, BookMarked, BookPlus, ChevronRight } from 'lucide-react'
 import type { Editor } from '@tiptap/core'
 
 export const OPEN_PROGRESSION_PICKER_EVENT = 'openCodexProgressionPicker'
+export const OPEN_QUICK_CREATE_CODEX_EVENT = 'openQuickCreateCodex'
 
 export interface SlashMenuItem {
   title: string
@@ -48,6 +49,15 @@ export const SLASH_MENU_ITEMS: SlashMenuItem[] = [
     command: (_e) => {
       void _e
       document.dispatchEvent(new CustomEvent(OPEN_PROGRESSION_PICKER_EVENT))
+    },
+  },
+  {
+    title: 'New Codex Entry',
+    description: 'Quickly create a codex entry and link to this scene',
+    icon: <BookPlus className="h-4 w-4" />,
+    command: (_e) => {
+      void _e
+      document.dispatchEvent(new CustomEvent(OPEN_QUICK_CREATE_CODEX_EVENT))
     },
   },
 ]

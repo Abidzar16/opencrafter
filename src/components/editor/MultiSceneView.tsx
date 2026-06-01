@@ -5,7 +5,8 @@ import { EmptyState } from '@/components/ui/empty-state'
 import { useCodexHoverCard } from '@/components/codex/CodexHoverCard'
 import { ProgressionPicker } from '@/components/codex/ProgressionPicker'
 import { ProgressionBadge } from '@/components/codex/ProgressionBadge'
-import { OPEN_PROGRESSION_PICKER_EVENT } from './extensions/slash-menu'
+import { QuickCreateCodexDialog } from '@/components/codex/QuickCreateCodexDialog'
+import { OPEN_PROGRESSION_PICKER_EVENT, OPEN_QUICK_CREATE_CODEX_EVENT } from './extensions/slash-menu'
 import { useUIStore } from '@/stores/ui-store'
 import { PenLine } from 'lucide-react'
 
@@ -50,6 +51,7 @@ export function MultiSceneView({
   const { setActivePanel } = useUIStore()
   const [activeSceneForProgression, setActiveSceneForProgression] = useState<string | null>(null)
   const [progressionPickerOpen, setProgressionPickerOpen] = useState(false)
+  const [quickCreateOpen, setQuickCreateOpen] = useState(false)
 
   // Open codex sidebar on entry click from hover card
   const openEntry = (id: string) => {
@@ -61,11 +63,16 @@ export function MultiSceneView({
 
   // Listen for slash menu "Codex Progression" command
   useEffect(() => {
-    const handler = () => {
-      setProgressionPickerOpen(true)
-    }
+    const handler = () => { setProgressionPickerOpen(true) }
     document.addEventListener(OPEN_PROGRESSION_PICKER_EVENT, handler)
     return () => document.removeEventListener(OPEN_PROGRESSION_PICKER_EVENT, handler)
+  }, [])
+
+  // Listen for slash menu "New Codex Entry" command
+  useEffect(() => {
+    const handler = () => { setQuickCreateOpen(true) }
+    document.addEventListener(OPEN_QUICK_CREATE_CODEX_EVENT, handler)
+    return () => document.removeEventListener(OPEN_QUICK_CREATE_CODEX_EVENT, handler)
   }, [])
 
   // Auto-select first scene when chapter changes
@@ -126,6 +133,13 @@ export function MultiSceneView({
           onClose={() => setProgressionPickerOpen(false)}
         />
       )}
+
+      <QuickCreateCodexDialog
+        open={quickCreateOpen}
+        novelId={novelId}
+        sceneId={activeSceneForProgression}
+        onClose={() => setQuickCreateOpen(false)}
+      />
     </>
   )
 }

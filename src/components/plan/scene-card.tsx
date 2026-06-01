@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge'
 import { ActionMenu } from '@/components/ui/action-menu'
 import { RevisionHistoryModal } from '@/components/ui/revision-history-modal'
 import { cn } from '@/lib/utils'
-import { Copy, Archive, Trash2, MoveRight, User, FileText, History } from 'lucide-react'
+import { Copy, Archive, Trash2, MoveRight, User, FileText, History, BookOpen } from 'lucide-react'
 import { useState } from 'react'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { MoveSceneDialog } from './move-dialog'
@@ -157,6 +157,12 @@ export function SceneCard({ scene, novelId, config, labels }: SceneCardProps) {
               {label.name}
             </Badge>
           ))}
+          {config.showCodexAssociations && scene.codexAssociations.length > 0 && (
+            <Badge variant="secondary" className="gap-1 text-xs">
+              <BookOpen className="h-2.5 w-2.5" />
+              {scene.codexAssociations.length}
+            </Badge>
+          )}
         </div>
       </div>
 

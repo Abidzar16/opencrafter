@@ -12,6 +12,7 @@ export interface CardConfig {
   showPov: boolean
   showLabels: boolean
   showSummary: boolean
+  showCodexAssociations: boolean
 }
 
 const DEFAULT_CONFIG: CardConfig = {
@@ -21,6 +22,7 @@ const DEFAULT_CONFIG: CardConfig = {
   showPov: true,
   showLabels: true,
   showSummary: true,
+  showCodexAssociations: true,
 }
 
 function loadConfig(): CardConfig {
@@ -143,6 +145,7 @@ export function CardConfigPopover({ config, onUpdate }: CardConfigPopoverProps) 
           <ToggleRow label="Word count" checked={config.showWordCount} onChange={v => onUpdate({ showWordCount: v })} />
           <ToggleRow label="POV character" checked={config.showPov} onChange={v => onUpdate({ showPov: v })} />
           <ToggleRow label="Labels" checked={config.showLabels} onChange={v => onUpdate({ showLabels: v })} />
+          <ToggleRow label="Codex associations" checked={config.showCodexAssociations} onChange={v => onUpdate({ showCodexAssociations: v })} />
         </div>
       </PopoverContent>
     </Popover>

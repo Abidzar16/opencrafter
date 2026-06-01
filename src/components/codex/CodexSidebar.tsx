@@ -1,14 +1,16 @@
 import { useState, useMemo } from 'react'
-import { Plus, Search, ChevronRight, ChevronDown, BookOpen } from 'lucide-react'
+import { Plus, Search, ChevronRight, ChevronDown, BookOpen, Pin, PinOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Badge } from '@/components/ui/badge'
 import { EmptyState } from '@/components/ui/empty-state'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useCodexEntries } from '@/lib/db/hooks'
 import { CodexType } from '@/types'
 import type { CodexEntry } from '@/types'
 import { cn } from '@/lib/utils'
+import { useUIStore } from '@/stores/ui-store'
 import { EntryEditor } from './EntryEditor'
 
 const TYPE_LABELS: Record<CodexType, string> = {
@@ -36,6 +38,7 @@ interface CodexSidebarProps {
 export function CodexSidebar({ novelId }: CodexSidebarProps) {
   const rawEntries = useCodexEntries(novelId)
   const entries = useMemo(() => rawEntries ?? [], [rawEntries])
+  const { codexPinned, toggleCodexPinned } = useUIStore()
 
   const [search, setSearch] = useState('')
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set())
@@ -99,6 +102,20 @@ export function CodexSidebar({ novelId }: CodexSidebarProps) {
         {/* Header */}
         <div className="flex shrink-0 items-center gap-2 border-b px-3 py-2">
           <span className="flex-1 text-sm font-semibold">Codex</span>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                size="icon"
+                variant={codexPinned ? 'secondary' : 'ghost'}
+                className="h-7 w-7"
+                onClick={toggleCodexPinned}
+              >
+                {codexPinned ? <PinOff className="h-3.5 w-3.5" /> : <Pin className="h-3.5 w-3.5" />}
+                <span className="sr-only">{codexPinned ? 'Unpin sidebar' : 'Pin sidebar'}</span>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom">{codexPinned ? 'Unpin sidebar' : 'Pin sidebar'}</TooltipContent>
+          </Tooltip>
           <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => openNewEntry()}>
             <Plus className="h-4 w-4" />
             <span className="sr-only">New entry</span>

@@ -53,7 +53,7 @@ const sidebarItems = [
 
 export function NovelShell({ novelId, children }: NovelShellProps) {
   const novel = useNovel(novelId)
-  const { sidebarCollapsed, toggleSidebar, activePanel, setActivePanel } = useUIStore()
+  const { sidebarCollapsed, toggleSidebar, activePanel, setActivePanel, codexPinned } = useUIStore()
   const location = useLocation()
   const currentMode = modes.find(m => location.pathname.endsWith(m.key))?.key ?? 'plan'
 
@@ -163,7 +163,7 @@ export function NovelShell({ novelId, children }: NovelShellProps) {
         </aside>
 
         {/* Side panel (Codex, Snippets, etc.) */}
-        {activePanel === 'codex' && (
+        {(activePanel === 'codex' || codexPinned) && (
           <div className="border-border bg-background w-72 shrink-0 overflow-hidden border-r">
             <CodexSidebar novelId={novelId} />
           </div>
