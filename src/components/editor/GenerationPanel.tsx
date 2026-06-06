@@ -6,7 +6,9 @@ import { Badge } from '@/components/ui/badge'
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
@@ -321,11 +323,29 @@ export function GenerationPanel({
                       <SelectValue placeholder="Select prompt…" />
                     </SelectTrigger>
                     <SelectContent>
-                      {typedPrompts.map((p: Prompt) => (
-                        <SelectItem key={p.id} value={p.id}>
-                          {p.name}
-                        </SelectItem>
-                      ))}
+                      {(() => {
+                        type P = Prompt & { groupId?: string }
+                        const ungrouped = typedPrompts.filter(p => !(p as P).groupId)
+                        const groupMap = new Map<string, Prompt[]>()
+                        for (const p of typedPrompts) {
+                          const gid = (p as P).groupId
+                          if (gid) {
+                            if (!groupMap.has(gid)) groupMap.set(gid, [])
+                            groupMap.get(gid)!.push(p)
+                          }
+                        }
+                        return (
+                          <>
+                            {ungrouped.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+                            {Array.from(groupMap.entries()).map(([gid, items]) => (
+                              <SelectGroup key={gid}>
+                                <SelectLabel>{gid}</SelectLabel>
+                                {items.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+                              </SelectGroup>
+                            ))}
+                          </>
+                        )
+                      })()}
                     </SelectContent>
                   </Select>
                 )}

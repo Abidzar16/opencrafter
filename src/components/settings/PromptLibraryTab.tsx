@@ -123,7 +123,7 @@ function PromptList({
 }) {
   const [deleteId, setDeleteId] = useState<string | null>(null)
 
-  const grouped = Object.values(PromptType).reduce<Record<PromptType, Prompt[]>>(
+  const byType = Object.values(PromptType).reduce<Record<PromptType, Prompt[]>>(
     (acc, t) => {
       acc[t] = prompts.filter(p => p.type === t)
       return acc
@@ -134,36 +134,54 @@ function PromptList({
   return (
     <>
       <div className="flex-1 overflow-y-auto">
-        {Object.entries(grouped).map(([type, items]) => {
+        {Object.entries(byType).map(([type, items]) => {
           if (items.length === 0) return null
+
+          // Sub-group by groupId within each type
+          const groupIds = Array.from(new Set(items.map(p => (p as Prompt & { groupId?: string }).groupId ?? ''))).sort()
+          const ungrouped = items.filter(p => !(p as Prompt & { groupId?: string }).groupId)
+          const grouped = groupIds.filter(Boolean).map(gid => ({
+            id: gid,
+            items: items.filter(p => (p as Prompt & { groupId?: string }).groupId === gid),
+          }))
+
+          function renderPromptRow(p: Prompt) {
+            return (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => onSelect(p.id)}
+                className={[
+                  'w-full text-left px-3 py-2.5 border-b last:border-b-0 hover:bg-accent transition-colors',
+                  selectedId === p.id ? 'bg-accent' : '',
+                ].join(' ')}
+              >
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="flex-1 text-sm font-medium truncate">{p.name}</span>
+                  {p.readOnly && (
+                    <Lock className="h-3 w-3 text-muted-foreground shrink-0" />
+                  )}
+                </div>
+                {p.description && (
+                  <p className="text-xs text-muted-foreground truncate mt-0.5">{p.description}</p>
+                )}
+              </button>
+            )
+          }
+
           return (
             <div key={type}>
               <div className="px-3 py-1.5 text-xs font-medium text-muted-foreground uppercase tracking-wide bg-muted/50 border-b">
                 {PROMPT_TYPE_LABELS[type as PromptType]}
               </div>
-              {items.map(p => (
-                <button
-                  key={p.id}
-                  type="button"
-                  onClick={() => onSelect(p.id)}
-                  className={[
-                    'w-full text-left px-3 py-2.5 border-b last:border-b-0 hover:bg-accent transition-colors',
-                    selectedId === p.id ? 'bg-accent' : '',
-                  ].join(' ')}
-                >
-                  <div className="flex items-center gap-2 min-w-0">
-                    <span className="flex-1 text-sm font-medium truncate">{p.name}</span>
-                    {p.readOnly && (
-                      <Lock className="h-3 w-3 text-muted-foreground shrink-0" />
-                    )}
+              {ungrouped.map(renderPromptRow)}
+              {grouped.map(group => (
+                <div key={group.id}>
+                  <div className="pl-6 pr-3 py-1 text-[11px] font-medium text-muted-foreground bg-muted/20 border-b">
+                    {group.id}
                   </div>
-                  {p.description && (
-                    <p className="text-xs text-muted-foreground truncate mt-0.5">{p.description}</p>
-                  )}
-                  <div className="flex gap-1 mt-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                    {/* Actions shown in right-click / keyboard accessible via detail panel */}
-                  </div>
-                </button>
+                  {group.items.map(renderPromptRow)}
+                </div>
               ))}
             </div>
           )

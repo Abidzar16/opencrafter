@@ -66,7 +66,7 @@ export function ChatView({ novelId }: ChatViewProps) {
     }, []),
   })
 
-  async function buildSystemMessage(attachments: ContextAttachment[]): Promise<string> {
+  async function buildSystemMessage(attachments: ContextAttachment[], inputValues?: Record<string, string>): Promise<string> {
     if (chatSelectedPromptId) {
       const prompt = await db.prompts.get(chatSelectedPromptId)
       if (prompt) {
@@ -79,7 +79,7 @@ export function ChatView({ novelId }: ChatViewProps) {
             persona = p?.instructions
           }
         } catch { /* ignore */ }
-        return resolveChatSystemPrompt(prompt.instructions, attachments, persona)
+        return resolveChatSystemPrompt(prompt.instructions, attachments, persona, inputValues)
       }
     }
     let base = 'You are a helpful creative writing assistant.'
@@ -90,7 +90,7 @@ export function ChatView({ novelId }: ChatViewProps) {
     return base
   }
 
-  async function handleSend(text: string) {
+  async function handleSend(text: string, inputValues?: Record<string, string>) {
     if (!activeThreadId) { toast.error('Select or create a thread first'); return }
     if (!chatSelectedConfigId) { toast.error('Select a model in the message bar'); return }
 
@@ -105,7 +105,7 @@ export function ChatView({ novelId }: ChatViewProps) {
       contextSnapshot: context.length > 0 ? context : undefined,
     })
 
-    const systemContent = await buildSystemMessage(context)
+    const systemContent = await buildSystemMessage(context, inputValues)
 
     // Load all messages (including the one just saved)
     const allMessages: ChatMessage[] = await db.chat_messages

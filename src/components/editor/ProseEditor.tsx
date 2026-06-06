@@ -1,6 +1,5 @@
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
-import Underline from '@tiptap/extension-underline'
 import Placeholder from '@tiptap/extension-placeholder'
 import { cn } from '@/lib/utils'
 
@@ -22,7 +21,6 @@ export function ProseEditor({
   const editor = useEditor({
     extensions: [
       StarterKit,
-      Underline,
       Placeholder.configure({ placeholder }),
     ],
     content: Object.keys(content).length > 0 ? content : undefined,

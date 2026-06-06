@@ -127,6 +127,7 @@ export async function resolveChatSystemPrompt(
   promptInstructions: string,
   attachments: ContextAttachment[],
   personaInstructions?: string,
+  inputValues?: Record<string, string>,
 ): Promise<string> {
   // Resolve {{component:name}} placeholders
   const components = await db.prompt_components.toArray()
@@ -134,6 +135,14 @@ export async function resolveChatSystemPrompt(
   let system = promptInstructions.replace(/\{\{component:([^}]+)\}\}/g, (_, name: string) => {
     return componentMap.get(name.toLowerCase().trim()) ?? `[component: ${name.trim()}]`
   })
+
+  // Resolve {{key}} placeholders from input values
+  if (inputValues && Object.keys(inputValues).length > 0) {
+    system = system.replace(/\{\{([^}]+)\}\}/g, (match, key: string) => {
+      const k = key.trim()
+      return k in inputValues ? (inputValues[k] ?? match) : match
+    })
+  }
 
   // Append resolved context
   if (attachments.length > 0) {

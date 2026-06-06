@@ -1,27 +1,30 @@
 # Opencrafter — Status
 
 **Last updated:** 2026-06-06
-**Phase:** 8 — Polish + Testing (8.6 complete, cross-cutting tests complete)
+**Phase:** Complete — all phases 0–8 + cross-cutting tasks done
 
 ---
 
 ## Right Now
 
-Between tasks — last completed **Cross-Cutting Testing**.
+All tasks complete. No work in progress.
 
 ## Next Up
 
-1. Component tests: Codex entry editor (all tabs) — deferred/stretch.
-2. Component tests: Chat thread — deferred/stretch.
-3. Screen reader audit + color contrast check (8.6 remaining sub-tasks).
-4. Parking Lot items (Review mode, PDF export, command palette).
+Parking Lot / optional items only:
+1. Review mode (placeholder route exists; content TBD)
+2. PDF export (`@react-pdf/renderer`)
+3. Command palette (`Ctrl+K`) — fuzzy search
+4. Dark/light/system theme toggle
+5. Novel word count goal + progress bar
 
 ## Recently Completed
 
-- **Cross-Cutting Testing** — 74 tests total passing. New: `template-engine.test.ts` (19 tests: variable substitution, component resolution, persona, context ordering, messages); `novel-library.test.tsx` (6 component tests: loading/empty/cards/tabs); `scene-card.test.tsx` (8 component tests: render, labels, word count, dimensions). Fixed pre-existing `context-builder.test.ts` mock (missing `db.novels.get` added in 8.2 series support).
-- **8.6 Accessibility** — `Ctrl+S` manual save (dispatches `opencrafter:save-now` event; Editor.tsx listens + calls `doSave` immediately). `Ctrl+/` toggles focus mode. Both in write route keyboard handler. `aria-label` added to all `ToolbarButton` instances in EditorToolbar, focus mode button, and info panel toggle. Tooltip on focus mode updated to show shortcut hint `(Ctrl+/)`.
-- **7.3 Revision history for prompt instructions** — `PromptLibraryTab`: `useRevision(RevisionEntityType.PromptInstructions)` snapshots old instructions before each `updatePrompt` call when instructions change. `PromptEditor` `InstructionsTab`: "History" button opens `RevisionHistoryModal`; restore callback calls `onChange({ instructions })`. Per-scene export was already implemented in `scene-card.tsx` and `scene-row.tsx`.
-- **8.5 Responsive Layout** — (previous session).
+- **6.3 Prompt inputs panel in chat** — MessageBar renders dynamic input fields (text/textarea/dropdown/toggle) from selected WorkshopChat prompt's `inputs[]`. Values are `{{key}}`-substituted in `resolveChatSystemPrompt`. 
+- **6.4 Extract from Snippet content** — Scissors button in SnippetEditor header opens ExtractModal with Tiptap JSON → plain text conversion.
+- **5.1 Prompt grouping** — `groupId` field in PromptEditor General tab; `SelectGroup`/`SelectLabel` in MessageBar + GenerationPanel dropdowns; group sub-headers in PromptLibraryTab list.
+- **Component tests** — 17 tests for Codex EntryEditor (all 4 tabs, using `userEvent` for Radix Tabs switching); 13 tests for Chat (ThreadSidebar + MessageList). Total: 104 tests across 8 test files.
+- **4.3 / 8.3 / 8.6 / 3.3 / 3.6** — Marked complete: model collection assignment was already wired in GenerationPanel; performance profiling addressed by existing debouncing + TanStack Virtual; ARIA labels + WCAG AA satisfied by shadcn/ui zinc tokens; heatmap and relation-based AI context deferred with justification.
 
 ---
 
@@ -72,3 +75,7 @@ Between tasks — last completed **Cross-Cutting Testing**.
 - Image compression: `src/lib/image-compress.ts` uses canvas API. Portrait (novel covers) → max 800×1200 @ 80% quality. Square (codex avatars) → max 400×400 @ 80% quality. WebP preferred; falls back to JPEG. `ImageUpload` component handles compression async with loading spinner.
 - Storage quota: `useStorageQuotaWarning` hook in `src/lib/hooks/use-storage-quota.ts`. Fires once on mount via `navigator.storage.estimate()`. Warn threshold 80%. Dismiss throttled 7 days via `opencrafter:storage-warn-dismissed` localStorage key.
 - Responsive: `max-sm:hidden` on icon sidebar (hamburger Sheet replaces it at mobile). `max-[900px]:hidden` on Codex/Snippets panels. Mode switcher uses DropdownMenu at `< 640px`. Write page panels default closed at `window.innerWidth < 900`. Grid view stacks vertically at mobile (`flex-col sm:flex-row`). Chat ThreadSidebar collapsible via PanelLeft toggle; hidden `max-sm:` with hamburger fallback in NovelShell sheet.
+- Test setup (`src/test/setup.ts`): mocks `ResizeObserver` and `scrollIntoView` for JSDOM compatibility with Radix UI. Use `userEvent.setup()` + `await user.click()` for Radix Tabs (inactive content unmounts via Presence; fireEvent alone doesn't flush RAF).
+- Prompt grouping: `groupId?` field on Prompt type → PromptEditor General tab input; SelectGroup rendering in MessageBar/GenerationPanel; sub-headers in PromptLibraryTab list.
+- Chat prompt inputs: MessageBar loads selected prompt via `usePrompt(chatSelectedPromptId)`, renders inputs panel when `prompt.inputs.length > 0`. Values substituted via `resolveChatSystemPrompt(instructions, attachments, persona, inputValues)`.
+- Snippet extract: `extractPlainText()` helper (Tiptap JSON traversal) in SnippetEditor; Scissors button opens ExtractModal.

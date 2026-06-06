@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { X, Trash2, History, Tag } from 'lucide-react'
+import { X, Trash2, History, Tag, Scissors } from 'lucide-react'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -7,11 +7,22 @@ import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { RevisionHistoryModal } from '@/components/ui/revision-history-modal'
+import { ExtractModal } from '@/components/chat/ExtractModal'
 import { ProseEditor } from '@/components/editor/ProseEditor'
 import { useSnippet, useUpdateSnippet, useDeleteSnippet } from '@/lib/db/hooks'
 import { useRevision } from '@/lib/hooks/use-revision'
 import { useDebouncedSave } from '@/lib/hooks/use-debounced-save'
 import { RevisionEntityType } from '@/types'
+
+function extractPlainText(node: Record<string, unknown>): string {
+  if (node.type === 'text') return (node.text as string) ?? ''
+  const children = (node.content as Record<string, unknown>[]) ?? []
+  const childText = children.map(extractPlainText).join('')
+  if (node.type === 'paragraph' || node.type === 'heading') {
+    return childText ? childText + '\n' : '\n'
+  }
+  return childText
+}
 
 interface SnippetEditorProps {
   open: boolean
@@ -20,7 +31,7 @@ interface SnippetEditorProps {
   onClose: () => void
 }
 
-export function SnippetEditor({ open, snippetId, novelId: _novelId, onClose }: SnippetEditorProps) {
+export function SnippetEditor({ open, snippetId, novelId, onClose }: SnippetEditorProps) {
   const snippet = useSnippet(snippetId)
   const updateSnippet = useUpdateSnippet()
   const deleteSnippet = useDeleteSnippet()
@@ -31,6 +42,7 @@ export function SnippetEditor({ open, snippetId, novelId: _novelId, onClose }: S
   const [tagInput, setTagInput] = useState('')
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [revHistoryOpen, setRevHistoryOpen] = useState(false)
+  const [extractOpen, setExtractOpen] = useState(false)
 
   const saveRevision = useRevision(RevisionEntityType.SnippetContent, snippetId)
 
@@ -126,6 +138,16 @@ export function SnippetEditor({ open, snippetId, novelId: _novelId, onClose }: S
               size="icon"
               variant="ghost"
               className="h-7 w-7"
+              onClick={() => setExtractOpen(true)}
+              title="Extract content"
+            >
+              <Scissors className="h-3.5 w-3.5" />
+              <span className="sr-only">Extract content</span>
+            </Button>
+            <Button
+              size="icon"
+              variant="ghost"
+              className="h-7 w-7"
               onClick={() => setRevHistoryOpen(true)}
               title="Version history"
             >
@@ -209,6 +231,13 @@ export function SnippetEditor({ open, snippetId, novelId: _novelId, onClose }: S
           onRestore={handleRestoreRevision}
         />
       )}
+
+      <ExtractModal
+        open={extractOpen}
+        onClose={() => setExtractOpen(false)}
+        content={extractPlainText(content as Record<string, unknown>)}
+        novelId={novelId}
+      />
     </>
   )
 }

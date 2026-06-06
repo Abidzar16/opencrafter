@@ -100,6 +100,21 @@ function GeneralTab({ prompt, onChange }: PromptEditorProps) {
       </div>
 
       <div className="space-y-1.5">
+        <Label htmlFor="prompt-group">Group</Label>
+        <Input
+          id="prompt-group"
+          value={(prompt as Prompt & { groupId?: string }).groupId ?? ''}
+          onChange={e => onChange({ groupId: e.target.value || undefined } as Partial<Prompt>)}
+          disabled={prompt.readOnly}
+          placeholder="e.g. Fiction, Technical, My Prompts…"
+          className="text-sm"
+        />
+        <p className="text-xs text-muted-foreground">
+          Prompts in the same group are shown together in dropdowns.
+        </p>
+      </div>
+
+      <div className="space-y-1.5">
         <Label htmlFor="prompt-description">Description</Label>
         <Textarea
           id="prompt-description"

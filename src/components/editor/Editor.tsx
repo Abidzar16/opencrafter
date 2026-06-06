@@ -3,7 +3,6 @@ import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import CharacterCount from '@tiptap/extension-character-count'
 import Placeholder from '@tiptap/extension-placeholder'
-import Underline from '@tiptap/extension-underline'
 import TextAlign from '@tiptap/extension-text-align'
 import Typography from '@tiptap/extension-typography'
 import { Extension } from '@tiptap/core'
@@ -115,7 +114,6 @@ export function Editor({
       StarterKit.configure({ history: { depth: 100 } }),
       CharacterCount,
       Placeholder.configure({ placeholder: 'Start writing…' }),
-      Underline,
       TextAlign.configure({ types: ['heading', 'paragraph'] }),
       Typography,
       BeatNode,
@@ -129,8 +127,8 @@ export function Editor({
         class: 'prose-editor focus:outline-none',
       },
     },
-    // Use onTransaction to filter out detection-only dispatches from save
     onTransaction: ({ transaction }) => {
+      if (!transaction.docChanged) return
       if (transaction.getMeta(CODEX_DETECTION_META)) return
       triggerSave()
     },
