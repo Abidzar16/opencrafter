@@ -1,8 +1,10 @@
-import type { ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { Link, useLocation } from '@tanstack/react-router'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Separator } from '@/components/ui/separator'
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { SaveIndicator } from './save-indicator'
 import { CodexSidebar } from '@/components/codex/CodexSidebar'
 import { SnippetsSidebar } from '@/components/snippets/SnippetsSidebar'
@@ -23,6 +25,8 @@ import {
   PenLine,
   MessageSquare,
   ClipboardCheck,
+  Menu,
+  ChevronDown,
 } from 'lucide-react'
 
 interface NovelShellProps {
@@ -58,12 +62,26 @@ export function NovelShell({ novelId, children }: NovelShellProps) {
   const { sidebarCollapsed, toggleSidebar, activePanel, setActivePanel, codexPinned, snippetsPinned } = useUIStore()
   const location = useLocation()
   const currentMode = modes.find(m => location.pathname.endsWith(m.key))?.key ?? 'plan'
+  const currentModeLabel = modes.find(m => m.key === currentMode)?.label ?? 'Plan'
+
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   return (
     <div className="flex h-screen flex-col overflow-hidden">
       {/* Top navigation bar */}
       <header className="bg-background border-border flex h-12 shrink-0 items-center gap-2 border-b px-3">
         <div className="flex items-center gap-2">
+          {/* Hamburger: mobile only (< 640px) */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 sm:hidden"
+            onClick={() => setMobileMenuOpen(true)}
+            aria-label="Open sidebar menu"
+          >
+            <Menu className="h-4 w-4" />
+          </Button>
+
           <Tooltip>
             <TooltipTrigger asChild>
               <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
@@ -76,14 +94,14 @@ export function NovelShell({ novelId, children }: NovelShellProps) {
             <TooltipContent>Library</TooltipContent>
           </Tooltip>
 
-          <Separator orientation="vertical" className="h-5" />
-
+          {/* Sidebar toggle: hidden at mobile (< 640px) */}
+          <Separator orientation="vertical" className="hidden h-5 sm:block" />
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8"
+                className="hidden h-8 w-8 sm:flex"
                 onClick={toggleSidebar}
               >
                 {sidebarCollapsed ? (
@@ -97,26 +115,51 @@ export function NovelShell({ novelId, children }: NovelShellProps) {
             <TooltipContent>{sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}</TooltipContent>
           </Tooltip>
 
-          <span className="text-foreground max-w-[200px] truncate text-sm font-medium">
+          <span className="text-foreground max-w-[140px] truncate text-sm font-medium sm:max-w-[200px]">
             {novel?.title ?? '…'}
           </span>
         </div>
 
+        {/* Mode switcher — full buttons at sm+, dropdown at mobile */}
         <div className="flex flex-1 items-center justify-center gap-1">
-          {modes.map(mode => (
-            <Button
-              key={mode.key}
-              variant={currentMode === mode.key ? 'secondary' : 'ghost'}
-              size="sm"
-              className="gap-1.5"
-              asChild
-            >
-              <Link to={mode.to} params={{ novelId }}>
-                {mode.icon}
-                <span className="hidden sm:inline">{mode.label}</span>
-              </Link>
-            </Button>
-          ))}
+          {/* Desktop: icon + label buttons */}
+          <div className="hidden gap-1 sm:flex">
+            {modes.map(mode => (
+              <Button
+                key={mode.key}
+                variant={currentMode === mode.key ? 'secondary' : 'ghost'}
+                size="sm"
+                className="gap-1.5"
+                asChild
+              >
+                <Link to={mode.to} params={{ novelId }}>
+                  {mode.icon}
+                  <span className="hidden md:inline">{mode.label}</span>
+                </Link>
+              </Button>
+            ))}
+          </div>
+
+          {/* Mobile: dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="h-8 gap-1.5 sm:hidden">
+                {modes.find(m => m.key === currentMode)?.icon}
+                <span className="text-xs">{currentModeLabel}</span>
+                <ChevronDown className="h-3 w-3" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="center">
+              {modes.map(mode => (
+                <DropdownMenuItem key={mode.key} asChild>
+                  <Link to={mode.to} params={{ novelId }} className="flex items-center gap-2">
+                    {mode.icon}
+                    {mode.label}
+                  </Link>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         <div className="flex items-center gap-2">
@@ -137,10 +180,10 @@ export function NovelShell({ novelId, children }: NovelShellProps) {
 
       {/* Body: sidebar + main */}
       <div className="flex flex-1 overflow-hidden">
-        {/* Icon sidebar */}
+        {/* Icon sidebar — hidden at < 640px; hidden when sidebarCollapsed */}
         <aside
           className={cn(
-            'bg-sidebar border-sidebar-border flex shrink-0 flex-col items-center gap-1 border-r py-2',
+            'bg-sidebar border-sidebar-border hidden shrink-0 flex-col items-center gap-1 border-r py-2 sm:flex',
             sidebarCollapsed ? 'w-0 overflow-hidden p-0' : 'w-12',
           )}
         >
@@ -154,9 +197,9 @@ export function NovelShell({ novelId, children }: NovelShellProps) {
                   onClick={() =>
                     setActivePanel(activePanel === item.key ? null : item.key)
                   }
+                  aria-label={item.label}
                 >
                   {item.icon}
-                  <span className="sr-only">{item.label}</span>
                 </Button>
               </TooltipTrigger>
               <TooltipContent side="right">{item.label}</TooltipContent>
@@ -164,15 +207,15 @@ export function NovelShell({ novelId, children }: NovelShellProps) {
           ))}
         </aside>
 
-        {/* Side panel (Codex, Snippets, etc.) */}
+        {/* Side panel (Codex, Snippets) — hidden below 900px */}
         {(activePanel === 'codex' || codexPinned) && (
-          <div className="border-border bg-background w-72 shrink-0 overflow-hidden border-r">
+          <div className="border-border bg-background hidden w-72 shrink-0 overflow-hidden border-r max-[900px]:hidden min-[900px]:block">
             <CodexSidebar novelId={novelId} />
           </div>
         )}
 
         {(activePanel === 'snippets' || snippetsPinned) && (
-          <div className="border-border bg-background w-72 shrink-0 overflow-hidden border-r">
+          <div className="border-border bg-background hidden w-72 shrink-0 overflow-hidden border-r max-[900px]:hidden min-[900px]:block">
             <SnippetsSidebar novelId={novelId} />
           </div>
         )}
@@ -187,6 +230,42 @@ export function NovelShell({ novelId, children }: NovelShellProps) {
         novelId={novelId}
         onClose={() => setActivePanel(null)}
       />
+
+      {/* Mobile sidebar sheet (< 640px) */}
+      <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+        <SheetContent side="left" className="w-64 p-0">
+          <SheetHeader className="border-b px-4 py-3">
+            <SheetTitle className="text-sm">Menu</SheetTitle>
+          </SheetHeader>
+          <div className="flex flex-col gap-1 p-2">
+            {sidebarItems.map(item => (
+              <Button
+                key={item.key}
+                variant={activePanel === item.key ? 'secondary' : 'ghost'}
+                className="h-10 justify-start gap-3"
+                onClick={() => {
+                  setActivePanel(activePanel === item.key ? null : item.key)
+                  setMobileMenuOpen(false)
+                }}
+              >
+                {item.icon}
+                <span className="text-sm">{item.label}</span>
+              </Button>
+            ))}
+          </div>
+          {/* Mobile: show panel content inline */}
+          {(activePanel === 'codex' || codexPinned) && (
+            <div className="border-t">
+              <CodexSidebar novelId={novelId} />
+            </div>
+          )}
+          {(activePanel === 'snippets' || snippetsPinned) && (
+            <div className="border-t">
+              <SnippetsSidebar novelId={novelId} />
+            </div>
+          )}
+        </SheetContent>
+      </Sheet>
     </div>
   )
 }

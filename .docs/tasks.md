@@ -596,17 +596,17 @@
 
 ### 8.4 Cover Images
 
-- [ ] Novel cover image: file → compress to max 800×1200px + quality 80% (using canvas API) → base64 → Dexie
-- [ ] Codex entry avatar/cover image: compress to max 400×400px → base64 → Dexie
-- [ ] Storage quota warning: check `navigator.storage.estimate()` on startup; warn at 80% usage with link to Export All Data
+- [x] Novel cover image: file → compress to max 800×1200px + quality 80% (using canvas API) → base64 → Dexie
+- [x] Codex entry avatar/cover image: compress to max 400×400px → base64 → Dexie
+- [x] Storage quota warning: check `navigator.storage.estimate()` on startup; warn at 80% usage with link to Export All Data
 
 ### 8.5 Responsive Layout (Tablet/Mobile)
 
-- [ ] Sidebar: collapse to icon-only at `< 900px`; hide entirely (hamburger toggle) at `< 640px`
-- [ ] Top nav: collapse mode switcher + view selector to a dropdown menu at `< 640px`
-- [ ] Grid view: reduce to 1-column at `< 640px`
-- [ ] Editor: hide story timeline and scene details panel by default at `< 900px`; toggle via buttons
-- [ ] Chat: stack context selector below message input at `< 640px`
+- [x] Sidebar: collapse to icon-only at `< 900px`; hide entirely (hamburger toggle) at `< 640px`
+- [x] Top nav: collapse mode switcher + view selector to a dropdown menu at `< 640px`
+- [x] Grid view: reduce to 1-column at `< 640px`
+- [x] Editor: hide story timeline and scene details panel by default at `< 900px`; toggle via buttons
+- [x] Chat: stack context selector below message input at `< 640px`
 
 ### 8.6 Accessibility
 

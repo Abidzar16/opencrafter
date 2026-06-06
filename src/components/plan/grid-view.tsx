@@ -136,7 +136,8 @@ export function GridView({ novelId, config, search }: GridViewProps) {
 
   return (
     <div className="h-full overflow-auto">
-      <div className="flex gap-6 px-6 py-4 w-max min-w-full">
+      {/* sm+: horizontal scroll; mobile: vertical stack (1 column) */}
+      <div className="flex flex-col gap-6 px-4 py-4 sm:w-max sm:min-w-full sm:flex-row sm:px-6">
         {activeActs.map(act => (
           <ActGroup
             key={act.id}

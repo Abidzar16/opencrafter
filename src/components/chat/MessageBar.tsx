@@ -77,8 +77,8 @@ export function MessageBar({ novelId, context, onContextChange, onSend }: Messag
         </div>
       )}
 
-      {/* Prompt + Model pickers */}
-      <div className="flex items-center gap-2 px-4 pt-2">
+      {/* Prompt + Model pickers — wrap at mobile */}
+      <div className="flex flex-wrap items-center gap-2 px-4 pt-2">
         {chatPrompts.length > 0 && (
           <Select value={chatSelectedPromptId} onValueChange={setChatSelectedPromptId}>
             <SelectTrigger className="h-7 w-44 text-xs">
