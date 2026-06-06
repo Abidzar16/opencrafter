@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
-import { GripVertical, Plus, Trash2, ChevronDown } from 'lucide-react'
+import { GripVertical, Plus, Trash2, ChevronDown, History } from 'lucide-react'
+import { RevisionHistoryModal } from '@/components/ui/revision-history-modal'
+import { RevisionEntityType } from '@/types'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -34,6 +36,7 @@ import { PromptType } from '@/types'
 interface PromptEditorProps {
   prompt: Prompt
   onChange: (updates: Partial<Prompt>) => void
+  onRestoreInstructions?: (content: string) => void
 }
 
 const PROMPT_TYPE_LABELS: Record<PromptType, string> = {
@@ -154,9 +157,10 @@ function GeneralTab({ prompt, onChange }: PromptEditorProps) {
 
 // ─── Instructions Tab ─────────────────────────────────────────────────────────
 
-function InstructionsTab({ prompt, onChange }: PromptEditorProps) {
+function InstructionsTab({ prompt, onChange, onRestoreInstructions }: PromptEditorProps) {
   const components = usePromptComponents() ?? []
   const [insertOpen, setInsertOpen] = useState(false)
+  const [revisionOpen, setRevisionOpen] = useState(false)
 
   function insertAtCursor(text: string) {
     const el = document.getElementById('prompt-instructions') as HTMLTextAreaElement | null
@@ -180,6 +184,16 @@ function InstructionsTab({ prompt, onChange }: PromptEditorProps) {
       <div className="flex items-center justify-between">
         <Label htmlFor="prompt-instructions">System Prompt</Label>
         <div className="flex gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 text-xs"
+            onClick={() => setRevisionOpen(true)}
+            aria-label="Version history"
+          >
+            <History className="mr-1 h-3 w-3" />
+            History
+          </Button>
           <Popover open={insertOpen} onOpenChange={setInsertOpen}>
             <PopoverTrigger asChild>
               <Button variant="outline" size="sm" className="h-7 text-xs" disabled={prompt.readOnly}>
@@ -238,6 +252,17 @@ function InstructionsTab({ prompt, onChange }: PromptEditorProps) {
         Use <code className="bg-muted px-1 rounded">{'{{context}}'}</code> to embed the full
         assembled context, or individual block variables. If omitted, context is appended automatically.
       </p>
+
+      <RevisionHistoryModal
+        open={revisionOpen}
+        onOpenChange={setRevisionOpen}
+        entityType={RevisionEntityType.PromptInstructions}
+        entityId={prompt.id}
+        onRestore={content => {
+          onRestoreInstructions?.(content)
+          onChange({ instructions: content })
+        }}
+      />
     </div>
   )
 }
@@ -621,7 +646,7 @@ function ModelSettingsTab({ prompt, onChange }: PromptEditorProps) {
 
 // ─── Main PromptEditor ────────────────────────────────────────────────────────
 
-export function PromptEditor({ prompt, onChange }: PromptEditorProps) {
+export function PromptEditor({ prompt, onChange, onRestoreInstructions }: PromptEditorProps) {
   return (
     <Tabs defaultValue="general" className="flex flex-col h-full">
       <TabsList className="mx-4 mt-3 shrink-0 justify-start">
@@ -637,7 +662,7 @@ export function PromptEditor({ prompt, onChange }: PromptEditorProps) {
           <GeneralTab prompt={prompt} onChange={onChange} />
         </TabsContent>
         <TabsContent value="instructions" className="mt-0">
-          <InstructionsTab prompt={prompt} onChange={onChange} />
+          <InstructionsTab prompt={prompt} onChange={onChange} onRestoreInstructions={onRestoreInstructions} />
         </TabsContent>
         <TabsContent value="context" className="mt-0">
           <ContextTab prompt={prompt} onChange={onChange} />

@@ -1,26 +1,27 @@
 # Opencrafter — Status
 
 **Last updated:** 2026-06-06
-**Phase:** 8 — Polish (8.4 & 8.5 complete)
+**Phase:** 8 — Polish + Testing (8.6 complete, cross-cutting tests complete)
 
 ---
 
 ## Right Now
 
-Between tasks — last completed **8.5 Responsive Layout**.
+Between tasks — last completed **Cross-Cutting Testing**.
 
 ## Next Up
 
-1. **8.6 Accessibility** — Keyboard nav audit, ARIA labels, color contrast, keyboard shortcuts.
-2. **7.3 remaining** — Per-scene export from scene action menu; revision history for prompt instructions.
-3. **Cross-Cutting Testing** — Unit + component tests (codex-detector, template-engine, context-builder, stream, library, plan grid, codex editor, chat).
+1. Component tests: Codex entry editor (all tabs) — deferred/stretch.
+2. Component tests: Chat thread — deferred/stretch.
+3. Screen reader audit + color contrast check (8.6 remaining sub-tasks).
+4. Parking Lot items (Review mode, PDF export, command palette).
 
 ## Recently Completed
 
-- **8.5 Responsive Layout** — `NovelShell`: icon strip hidden at `< 640px` (`max-sm:hidden`), hamburger button opens Sheet drawer with sidebar icons; mode switcher collapses to DropdownMenu at `< 640px`; side panels (Codex/Snippets) hidden below 900px (`max-[900px]:hidden`). Write page: `infoPanelOpen` defaults to `false` when `window.innerWidth < 900`; StoryTimeline wrapped in `max-[900px]:hidden`. Grid view: `flex-col` at mobile, `flex-row sm:` for horizontal scroll at sm+. Chat: ThreadSidebar hidden at `max-sm:hidden` with PanelLeft toggle in top bar; prompt/model pickers row uses `flex-wrap`.
-- **8.4 Cover Images** — `src/lib/image-compress.ts`: canvas-based `compressImage()` using `createObjectURL` + `HTMLImageElement` + canvas `toDataURL` (WebP preferred, JPEG fallback); portrait default 800×1200 @ 80%, square default 400×400 @ 80%. `ImageUpload` component: removes raw FileReader path, calls `compressImage` async, shows spinner during compression, surfaces errors. `src/lib/hooks/use-storage-quota.ts`: checks `navigator.storage.estimate()` on mount, shows persistent sonner warning toast at ≥ 80% usage with "Export backup" action button, throttled via localStorage (7-day dismiss). Wired into `__root.tsx`.
-- **8.3 PWA & Performance** — `vite-plugin-pwa` + Workbox service worker; SVG icon; PWA manifest; `index.html` theme-color; CodexSidebar TanStack Virtual (> 100 entries); gzip compression for large scene_content (> 50 KB); `useSceneContentDecoded` hook; Editor + StoryTimeline use decoded hook.
-- **8.2 Series Support** — `/series/$seriesId` route; DB v2 `seriesId` index on `codex_entries`; series codex in `buildAIContext`.
+- **Cross-Cutting Testing** — 74 tests total passing. New: `template-engine.test.ts` (19 tests: variable substitution, component resolution, persona, context ordering, messages); `novel-library.test.tsx` (6 component tests: loading/empty/cards/tabs); `scene-card.test.tsx` (8 component tests: render, labels, word count, dimensions). Fixed pre-existing `context-builder.test.ts` mock (missing `db.novels.get` added in 8.2 series support).
+- **8.6 Accessibility** — `Ctrl+S` manual save (dispatches `opencrafter:save-now` event; Editor.tsx listens + calls `doSave` immediately). `Ctrl+/` toggles focus mode. Both in write route keyboard handler. `aria-label` added to all `ToolbarButton` instances in EditorToolbar, focus mode button, and info panel toggle. Tooltip on focus mode updated to show shortcut hint `(Ctrl+/)`.
+- **7.3 Revision history for prompt instructions** — `PromptLibraryTab`: `useRevision(RevisionEntityType.PromptInstructions)` snapshots old instructions before each `updatePrompt` call when instructions change. `PromptEditor` `InstructionsTab`: "History" button opens `RevisionHistoryModal`; restore callback calls `onChange({ instructions })`. Per-scene export was already implemented in `scene-card.tsx` and `scene-row.tsx`.
+- **8.5 Responsive Layout** — (previous session).
 
 ---
 

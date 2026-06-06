@@ -1,4 +1,5 @@
-import { Plugin, PluginKey, DecorationSet, Decoration } from '@tiptap/pm/state'
+import { Plugin, PluginKey } from '@tiptap/pm/state'
+import { Decoration, DecorationSet } from '@tiptap/pm/view'
 import type { EditorView } from '@tiptap/pm/view'
 import { detect, countMentions } from '@/lib/codex-detector'
 import type { TrackedEntry } from '@/lib/codex-detector'

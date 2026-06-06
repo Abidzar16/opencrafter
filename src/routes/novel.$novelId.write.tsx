@@ -41,10 +41,25 @@ function WritePage() {
     }
   }, [chapters, activeChapterId, setActiveChapter])
 
-  // Esc exits focus mode
+  // Keyboard shortcuts
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && focusMode) setFocusMode(false)
+      // Esc — exit focus mode
+      if (e.key === 'Escape' && focusMode) {
+        setFocusMode(false)
+        return
+      }
+      // Ctrl+/ — toggle focus mode
+      if ((e.ctrlKey || e.metaKey) && e.key === '/') {
+        e.preventDefault()
+        setFocusMode(!focusMode)
+        return
+      }
+      // Ctrl+S — flush pending saves immediately
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault()
+        window.dispatchEvent(new CustomEvent('opencrafter:save-now'))
+      }
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
@@ -101,6 +116,7 @@ function WritePage() {
                 size="icon"
                 className="h-7 w-7"
                 onClick={() => setInfoPanelOpen(v => !v)}
+                aria-label={infoPanelOpen ? 'Close info panel' : 'Open info panel'}
               >
                 {infoPanelOpen ? (
                   <PanelRightClose className="h-3.5 w-3.5" />

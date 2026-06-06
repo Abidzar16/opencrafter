@@ -88,6 +88,13 @@ export function Editor({
 
   const triggerSave = useDebouncedSave(doSave, 800)
 
+  // Ctrl+S flushes pending save immediately for this editor instance
+  useEffect(() => {
+    const handler = () => { doSave().catch(() => {}) }
+    window.addEventListener('opencrafter:save-now', handler)
+    return () => window.removeEventListener('opencrafter:save-now', handler)
+  }, [doSave])
+
   // Build a stable Extension that holds the PM plugin
   const codexDetectionExtension = useRef(
     Extension.create({

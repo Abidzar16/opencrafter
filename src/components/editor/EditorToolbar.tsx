@@ -52,6 +52,7 @@ function ToolBtn({
           disabled={disabled}
           onClick={onClick}
           type="button"
+          aria-label={tooltip}
         >
           {children}
         </Button>
@@ -188,6 +189,7 @@ export function EditorToolbar({ editor, focusMode, onToggleFocusMode }: EditorTo
             size="icon"
             className="h-7 w-7"
             onClick={onToggleFocusMode}
+            aria-label={focusMode ? 'Exit focus mode' : 'Enter focus mode (Ctrl+/)'}
           >
             {focusMode ? (
               <Minimize2 className="h-3.5 w-3.5" />
@@ -196,7 +198,7 @@ export function EditorToolbar({ editor, focusMode, onToggleFocusMode }: EditorTo
             )}
           </Button>
         </TooltipTrigger>
-        <TooltipContent>{focusMode ? 'Exit focus mode (Esc)' : 'Focus mode'}</TooltipContent>
+        <TooltipContent>{focusMode ? 'Exit focus mode (Esc)' : 'Focus mode (Ctrl+/)'}</TooltipContent>
       </Tooltip>
     </div>
   )

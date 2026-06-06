@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea'
 import { useCodexEntries, useCreateCodexProgression } from '@/lib/db/hooks'
 import type { CodexProgressionMode } from '@/types'
-import { useToast } from '@/components/ui/toast-provider'
+import { toast } from '@/components/ui/toast-provider'
 
 interface ProgressionPickerProps {
   open: boolean
@@ -23,7 +23,6 @@ export function ProgressionPicker({
 }: ProgressionPickerProps) {
   const entries = useCodexEntries(novelId)
   const createProgression = useCreateCodexProgression()
-  const { toast } = useToast()
 
   const [entryId, setEntryId] = useState('')
   const [mode, setMode] = useState<CodexProgressionMode>('addition')
@@ -51,7 +50,7 @@ export function ProgressionPicker({
       content: content.trim(),
       detailKey: detailKey.trim() || undefined,
     })
-    toast({ title: 'Progression created', description: selectedEntry?.name })
+    toast('Progression created', { description: selectedEntry?.name })
     setEntryId('')
     setContent('')
     setDetailKey('')

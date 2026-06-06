@@ -10,6 +10,21 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      window.__errors = [];
+      window.onerror = (msg, src, line, col, err) => {
+        window.__errors.push({ msg, src, line, col, stack: err?.stack });
+        document.getElementById('__err')?.remove();
+        const el = document.createElement('pre');
+        el.id = '__err';
+        el.style = 'position:fixed;top:0;left:0;right:0;background:#1e1e2e;color:#f38ba8;padding:16px;z-index:99999;font-size:13px;white-space:pre-wrap;max-height:50vh;overflow:auto';
+        el.textContent = '🔴 Runtime error:\n' + (err?.stack || msg) + '\n  at ' + src + ':' + line + ':' + col;
+        document.body.appendChild(el);
+      };
+      window.addEventListener('unhandledrejection', e => {
+        window.onerror(String(e.reason), '', 0, 0, e.reason instanceof Error ? e.reason : new Error(String(e.reason)));
+      });
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

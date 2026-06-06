@@ -551,8 +551,8 @@
   - Custom XML builder; output a valid `.scriv` folder structure in ZIP
   - Acts → Folders, Chapters → Sub-folders, Scenes → `.txt` files
   - Binder XML reflecting hierarchy
-- [ ] Per-scene export from scene action menu (plain text or Markdown, single scene only)
-- [ ] Revision history for custom prompt instructions (wire `useRevision` hook)
+- [x] Per-scene export from scene action menu (plain text or Markdown, single scene only)
+- [x] Revision history for custom prompt instructions (wire `useRevision` hook)
 
 ---
 
@@ -610,11 +610,11 @@
 
 ### 8.6 Accessibility
 
-- [ ] Keyboard navigation audit: every interactive element reachable via Tab; focus indicators visible
-- [ ] ARIA labels: all icon-only buttons have `aria-label`; all form fields have associated labels
+- [x] Keyboard navigation audit: every interactive element reachable via Tab; focus indicators visible
+- [x] ARIA labels: all icon-only buttons have `aria-label`; all form fields have associated labels
 - [ ] Screen reader test on novel library, plan grid, and editor
 - [ ] Color contrast: all text meets WCAG AA (4.5:1 for normal text, 3:1 for large text)
-- [ ] Add primary keyboard shortcuts (document in settings / help):
+- [x] Add primary keyboard shortcuts (document in settings / help):
   - `Ctrl+S` — manual save trigger
   - `Ctrl+/` — toggle focus mode (Write)
   - `Ctrl+K` — open command palette (optional, stretch goal)
@@ -626,12 +626,12 @@
 
 > Write tests as features are implemented, not after.
 
-- [ ] Unit tests: `src/lib/codex-detector/` — full coverage of match, alias, plural, exclusion, case-sensitivity edge cases
-- [ ] Unit tests: `src/lib/ai/template-engine.ts` — variable substitution, context block ordering, missing variable handling
-- [ ] Unit tests: `src/lib/ai/context-builder.ts` — `Never include` enforcement is covered by at least 3 test cases
-- [ ] Unit tests: `src/lib/ai/stream.ts` — SSE parsing for OpenAI and Anthropic stream formats
-- [ ] Component tests: Novel library (create, rename, delete novel)
-- [ ] Component tests: Plan Grid view (add scene, reorder, archive)
+- [x] Unit tests: `src/lib/codex-detector/` — full coverage of match, alias, plural, exclusion, case-sensitivity edge cases
+- [x] Unit tests: `src/lib/ai/template-engine.ts` — variable substitution, context block ordering, missing variable handling
+- [x] Unit tests: `src/lib/ai/context-builder.ts` — `Never include` enforcement is covered by at least 3 test cases
+- [x] Unit tests: `src/lib/ai/stream.ts` — SSE parsing for OpenAI and Anthropic stream formats
+- [x] Component tests: Novel library (create, rename, delete novel)
+- [x] Component tests: Plan Grid view (add scene, reorder, archive)
 - [ ] Component tests: Codex entry editor (all tabs)
 - [ ] Component tests: Chat thread (send message, streaming display, extract)
 - [ ] Integration test: full generation flow with a mock provider (beat → stream → apply to editor)

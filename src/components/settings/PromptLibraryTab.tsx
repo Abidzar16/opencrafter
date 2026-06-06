@@ -39,8 +39,9 @@ import {
 import { PromptEditor } from './PromptEditor'
 import { ComponentsSection } from './ComponentsSection'
 import { PersonasSection } from './PersonasSection'
+import { useRevision } from '@/lib/hooks/use-revision'
 import type { Prompt } from '@/types'
-import { PromptType } from '@/types'
+import { PromptType, RevisionEntityType } from '@/types'
 
 const PROMPT_TYPE_LABELS: Record<PromptType, string> = {
   [PromptType.BeatCompletion]: 'Beat Completion',
@@ -196,6 +197,11 @@ function PromptsPanel() {
   const [createOpen, setCreateOpen] = useState(false)
   const [deleteId, setDeleteId] = useState<string | null>(null)
 
+  const saveInstructionRevision = useRevision(
+    RevisionEntityType.PromptInstructions,
+    selectedId ?? undefined,
+  )
+
   const filtered = allPrompts.filter(p => {
     const matchesSearch =
       !search ||
@@ -247,9 +253,16 @@ function PromptsPanel() {
   const handleChange = useCallback(
     async (updates: Partial<Prompt>) => {
       if (!selectedId) return
+      // Snapshot current instructions before overwriting
+      if (updates.instructions !== undefined) {
+        const current = allPrompts.find(p => p.id === selectedId)
+        if (current?.instructions) {
+          await saveInstructionRevision(current.instructions)
+        }
+      }
       await updatePrompt(selectedId, updates)
     },
-    [selectedId, updatePrompt],
+    [selectedId, updatePrompt, allPrompts, saveInstructionRevision],
   )
 
   function handleExport(p: Prompt) {

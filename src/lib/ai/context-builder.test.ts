@@ -75,6 +75,7 @@ describe('filterNeverIncludeEntries', () => {
 
 vi.mock('@/lib/db/db', () => ({
   default: {
+    novels: { get: vi.fn() },
     codex_entries: { where: vi.fn() },
     codex_progressions: { where: vi.fn() },
     scenes: { get: vi.fn(), where: vi.fn() },
@@ -84,12 +85,14 @@ vi.mock('@/lib/db/db', () => ({
 import db from '@/lib/db/db'
 
 const mockDb = db as {
+  novels: { get: ReturnType<typeof vi.fn> }
   codex_entries: { where: ReturnType<typeof vi.fn> }
   codex_progressions: { where: ReturnType<typeof vi.fn> }
   scenes: { get: ReturnType<typeof vi.fn>; where: ReturnType<typeof vi.fn> }
 }
 
 function setupMockDb(entries: CodexEntry[], scenes = [{ id: 's1', order: 1 }]) {
+  mockDb.novels.get.mockResolvedValue(null)
   mockDb.codex_entries.where.mockReturnValue({
     equals: vi.fn().mockReturnValue({ toArray: vi.fn().mockResolvedValue(entries) }),
   })

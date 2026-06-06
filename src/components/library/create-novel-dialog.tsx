@@ -62,6 +62,7 @@ export function CreateNovelDialog({ open, onOpenChange }: CreateNovelDialogProps
   }
 
   return (
+    <>
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
@@ -126,5 +127,6 @@ export function CreateNovelDialog({ open, onOpenChange }: CreateNovelDialogProps
     </Dialog>
 
     <ImportWizard open={importOpen} onOpenChange={setImportOpen} />
+    </>
   )
 }
