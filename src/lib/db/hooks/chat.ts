@@ -58,6 +58,12 @@ export function useAddChatMessage() {
   }
 }
 
+export function useUpdateChatMessage() {
+  return async (id: string, data: Partial<ChatMessage>): Promise<void> => {
+    await db.chat_messages.update(id, data)
+  }
+}
+
 export function useDeleteChatMessage() {
   return async (id: string): Promise<void> => {
     await db.chat_messages.delete(id)

@@ -16,6 +16,10 @@ interface UIState {
   // plan module
   planView: PlanView
   planSearch: string
+  // chat module (ephemeral — reset on reload)
+  chatSelectedPromptId: string
+  chatSelectedConfigId: string
+  chatSplitView: boolean
 
   setSidebarCollapsed: (v: boolean) => void
   toggleSidebar: () => void
@@ -28,6 +32,9 @@ interface UIState {
   setCreateNovelOpen: (v: boolean) => void
   setPlanView: (v: PlanView) => void
   setPlanSearch: (v: string) => void
+  setChatSelectedPromptId: (id: string) => void
+  setChatSelectedConfigId: (id: string) => void
+  setChatSplitView: (v: boolean) => void
 }
 
 export const useUIStore = create<UIState>()(set => ({
@@ -40,6 +47,9 @@ export const useUIStore = create<UIState>()(set => ({
   createNovelOpen: false,
   planView: 'board',
   planSearch: '',
+  chatSelectedPromptId: '',
+  chatSelectedConfigId: '',
+  chatSplitView: false,
 
   setSidebarCollapsed: v => set({ sidebarCollapsed: v }),
   toggleSidebar: () => set(s => ({ sidebarCollapsed: !s.sidebarCollapsed })),
@@ -52,4 +62,7 @@ export const useUIStore = create<UIState>()(set => ({
   setCreateNovelOpen: v => set({ createNovelOpen: v }),
   setPlanView: v => set({ planView: v }),
   setPlanSearch: v => set({ planSearch: v }),
+  setChatSelectedPromptId: id => set({ chatSelectedPromptId: id }),
+  setChatSelectedConfigId: id => set({ chatSelectedConfigId: id }),
+  setChatSplitView: v => set({ chatSplitView: v }),
 }))

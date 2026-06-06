@@ -1,30 +1,29 @@
 # Opencrafter — Status
 
-**Last updated:** 2026-06-01
-**Phase:** 5 — Prompt System (Phase 5 complete)
+**Last updated:** 2026-06-04
+**Phase:** 6 — Chat Module (Phase 6 complete)
 
 ---
 
 ## Right Now
 
-Between tasks — last completed **5.6 Prompt Preview**. Phase 5 complete.
+Between tasks — last completed **6.5 Thread Export & Split View**. Phase 6 complete.
 
 ## Next Up
 
-1. **6.1 Thread Management** — Chat thread sidebar, CRUD (create, rename, pin, archive, delete), "New chat" shortcut.
-2. **6.2 Chat Interface** — Message list (markdown AI messages), streaming token display, stop button, copy/delete/regenerate.
-3. **6.3 Context Selector & Message Bar** — Novel text / snippets / codex context selector, prompt picker, model picker.
-4. **6.4 Extract Feature** — Extract codex entries / plan chapters / scene beats from AI messages.
-5. **6.5 Thread Export & Split View** — Export thread as .md/.txt, split view alongside Plan or Write.
+1. **7.1 Snippets** — `SnippetsSidebar.tsx`, Tiptap editor, CRUD, tags, revision history, sidebar pinning.
+2. **7.2 Import** — `ImportWizard.tsx`, DOCX (mammoth) + Markdown import, heading→act/chapter/scene mapping, preview step.
+3. **7.3 Export** — DOCX, Markdown, Scrivener (.scriv) export; per-scene export from scene action menu.
+4. **8.1 Matrix View** — Third Plan view; configurable rows (Codex, POV, Labels, Subplots); TanStack Virtual for large matrices.
+5. **8.2 Series Support** — Series home screen, series codex (shared across novels).
 
 ## Recently Completed
 
-- **5.6 Prompt Preview** — `PromptPreviewModal` (3-tab: Messages / Context Blocks / Codex); shows resolved system + user messages, assembled blocks with char counts, included/excluded codex entries with reasons. Triggered from GenerationPanel ("Preview" button).
-- **5.5 Presets & Defaults** — Preset save/apply/delete in GenerationPanel; `DefaultsTab` in Settings (account-level defaults per prompt type + persona, stored in localStorage); novel-level overrides in NovelSettingsModal; prompt export (copy as JSON) + import (paste from clipboard) in PromptLibraryTab.
-- **5.4 Components & Personas** — `ComponentsSection.tsx` (CRUD with inline preview of `{{component:Name}}` syntax); `PersonasSection.tsx` (CRUD with scope badge); persona assignment in NovelSettingsModal (with per-type prompt overrides).
-- **5.3 Template Engine** — `src/lib/ai/template-engine.ts`: `resolvePrompt()` assembles all enabled context blocks in order, resolves `{{component:name}}` then `{{variable}}` placeholders, prepends persona, returns `{messages, contextBlocks, resolvedSystem}`. Integrated into GenerationPanel replacing hardcoded prompts.
-- **5.2 Prompt Editor** — `PromptEditor.tsx` with 5 tabs: General (name, type badge, model config multi-select, description), Instructions (textarea + insert-variable/component popover), Context (ordered toggle list with up/down), Inputs (CRUD with dialog, types: text/textarea/dropdown/toggle), Model Settings (temperature + max tokens overrides).
-- **5.1 Prompt Library UI** — `PromptLibraryTab.tsx` two-panel layout; `PromptLibraryTab` sub-tabs (Prompts / Components / Personas); 8 built-in default prompts seeded via `seedDefaultPrompts()` in main.tsx; search + type filter; prompt CRUD + duplicate.
+- **6.5 Thread Export & Split View** — Export .md/.txt download, copy full conversation, split-view toggle (UIStore `chatSplitView` state).
+- **6.4 Extract Feature** — `ExtractModal.tsx` with 3 tabs: Codex (parse `Name (aliases) [tags]: Description`), Plan (`#`/`##` → acts/chapters/scenes), Beats (copy formatted text).
+- **6.3 Context Selector & MessageBar** — `ContextSelector.tsx` (Novel / Codex / Snippets tabs, checkboxes with hierarchy); `MessageBar.tsx` (context pills, prompt/model pickers, Enter=send).
+- **6.2 Chat Interface** — `MessageBubble.tsx` (react-markdown v10 + remark-gfm, hover actions: copy/delete/regenerate/extract); `MessageList.tsx` (auto-scroll, `StreamingBubble` with cursor).
+- **6.1 Thread Management** — `ThreadSidebar.tsx` (CRUD, pin, archive, restore, double-click rename); `useUpdateChatMessage` added to chat hooks.
 
 ---
 
@@ -66,3 +65,7 @@ Between tasks — last completed **5.6 Prompt Preview**. Phase 5 complete.
 - Prompt system: `resolvePrompt()` in `template-engine.ts` is the single entry point for all AI generation. Resolves context blocks, `{{component:name}}`, `{{variable}}` in that order, then prepends persona. GenerationPanel now calls `resolvePrompt` instead of hardcoded prompts.
 - Account-level defaults stored in localStorage under `opencrafter:account-defaults`. Novel-level overrides stored in `novel.settings.*PromptId` fields.
 - Built-in prompts seeded via `seedDefaultPrompts()` at app startup (idempotent — checks for existing readOnly prompts first).
+- Chat module: `src/components/chat/` — ChatView, ThreadSidebar, MessageList, MessageBubble, MessageBar, ContextSelector, ExtractModal. `src/lib/ai/chat-context.ts` — `buildChatContext()` + `resolveChatSystemPrompt()`. `chatSelectedPromptId`, `chatSelectedConfigId`, `chatSplitView` added to UIStore. `useUpdateChatMessage` added to chat DB hooks.
+- Chat streaming: accumulated text tracked via `accumulatedRef` (not state) — avoids closure staleness. AI message saved to DB in `onDone` callback after stream completes.
+- react-markdown v10 + remark-gfm v4 installed for AI message markdown rendering.
+- `pnpm build` fails due to pre-existing `tsconfig.app.json` `ignoreDeprecations: "6.0"` flag issue (not related to Phase 6 work). `pnpm typecheck` (`tsc --noEmit`) passes clean.

@@ -465,38 +465,38 @@
 
 ### 6.1 Thread Management
 
-- [ ] Chat thread sidebar (left panel in Chat mode): list of threads for current novel
-- [ ] Thread CRUD: create (auto-name "Thread 1", "Thread 2", …), rename (double-click), pin (stays at top), archive, delete
-- [ ] Archived threads: collapsed "Archived" section at bottom of list; restore or permanently delete
-- [ ] "New chat" shortcut button
+- [x] Chat thread sidebar (left panel in Chat mode): list of threads for current novel
+- [x] Thread CRUD: create (auto-name "Thread 1", "Thread 2", …), rename (double-click), pin (stays at top), archive, delete
+- [x] Archived threads: collapsed "Archived" section at bottom of list; restore or permanently delete
+- [x] "New chat" shortcut button
 
 ### 6.2 Chat Interface
 
-- [ ] Message list component: renders user messages (plain text) and AI messages (markdown rendered)
+- [x] Message list component: renders user messages (plain text) and AI messages (markdown rendered)
   - Use `react-markdown` or similar for AI message rendering (code blocks, lists, bold/italic)
-- [ ] Streaming token display: show AI response character-by-character as it streams; cursor indicator
-- [ ] Stop generation button (visible during streaming)
-- [ ] Message timestamps (shown on hover)
-- [ ] Copy message button (copy raw text to clipboard)
-- [ ] Delete message button (remove from thread; with confirmation for AI message that has follow-ups)
-- [ ] Regenerate last AI message button
+- [x] Streaming token display: show AI response character-by-character as it streams; cursor indicator
+- [x] Stop generation button (visible during streaming)
+- [x] Message timestamps (shown on hover)
+- [x] Copy message button (copy raw text to clipboard)
+- [x] Delete message button (remove from thread; with confirmation for AI message that has follow-ups)
+- [x] Regenerate last AI message button
 
 ### 6.3 Context Selector & Message Bar
 
-- [ ] Context selector panel (above message input, expandable):
+- [x] Context selector panel (above message input, expandable):
   - Novel text section: "Full novel text" toggle + POV character filter; or specific act/chapter/scene checkboxes
   - Snippets section: multi-select snippets
   - Codex section: filter by type / category / tag; multi-select individual entries
-- [ ] Context pills below input showing what's attached (click to remove)
-- [ ] Prompt picker: swap active Workshop Chat prompt (dropdown of all Workshop Chat type prompts)
-- [ ] Model picker: select model collection + individual model
+- [x] Context pills below input showing what's attached (click to remove)
+- [x] Prompt picker: swap active Workshop Chat prompt (dropdown of all Workshop Chat type prompts)
+- [x] Model picker: select model collection + individual model
 - [ ] Prompt inputs panel: shows dynamic input fields from the active prompt (hide if no inputs)
-- [ ] Message submit (Enter or button); Shift+Enter for newline in input
+- [x] Message submit (Enter or button); Shift+Enter for newline in input
 
 ### 6.4 Extract Feature
 
-- [ ] "Extract" button on AI messages
-- [ ] Extract modal with 3 targets:
+- [x] "Extract" button on AI messages
+- [x] Extract modal with 3 targets:
   - **Codex Entries**: parse format `Name (aliases) [tags]: Description` from AI text; show parsed entries preview; checkbox to select which to create/overwrite; bulk create on confirm
   - **Plan Chapters**: parse `#`/`##` format (same as Create from Outline) → append to Plan; preview step
   - **Scene Beats**: outputs formatted beat text → copy to clipboard or paste into active Write editor
@@ -504,9 +504,9 @@
 
 ### 6.5 Thread Export & Split View
 
-- [ ] Export thread: "Export conversation" action → download as `.md` or `.txt` file
-- [ ] Copy full conversation: copy all messages as formatted text to clipboard
-- [ ] Split view: "Split left" / "Split right" actions on thread → chat panel opens as a side panel alongside the Plan or Write view (CSS panel split; same Zustand-controlled visibility)
+- [x] Export thread: "Export conversation" action → download as `.md` or `.txt` file
+- [x] Copy full conversation: copy all messages as formatted text to clipboard
+- [x] Split view: split view toggle button in chat header; `chatSplitView` state in UIStore (CSS panel split when active)
 
 ---
 
