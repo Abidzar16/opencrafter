@@ -1,29 +1,27 @@
 # Opencrafter — Status
 
 **Last updated:** 2026-06-06
-**Phase:** 8 — Polish (Phases 7 complete, 8.1–8.2 complete)
+**Phase:** 8 — Polish (Phase 8.3 complete)
 
 ---
 
 ## Right Now
 
-Between tasks — last completed **8.2 Series Support**.
+Between tasks — last completed **8.3 PWA & Performance**.
 
 ## Next Up
 
-1. **7.3 remaining** — Per-scene export from scene action menu; revision history for prompt instructions.
-2. **8.3 PWA & Performance** — vite-plugin-pwa, Workbox service worker, performance profiling.
-3. **8.4 Cover Images** — Novel/codex image compression + storage quota warning.
-4. **8.5 Responsive Layout** — Tablet/mobile sidebar collapse.
+1. **8.4 Cover Images** — Novel/codex image compression + storage quota warning.
+2. **8.5 Responsive Layout** — Tablet/mobile sidebar collapse.
+3. **8.6 Accessibility** — Keyboard nav audit, ARIA labels, color contrast.
+4. **7.3 remaining** — Per-scene export from scene action menu; revision history for prompt instructions.
 
 ## Recently Completed
 
+- **8.3 PWA & Performance** — `vite-plugin-pwa` installed; SVG app icon in `public/icon.svg`; PWA manifest (name, icon, theme_color `#09090b`, display: standalone) injected by plugin; Workbox service worker with CacheFirst for static assets + NetworkFirst for HTML navigation; `index.html` updated with theme-color meta; codex highlight debouncing with `requestIdleCallback` was already in place; virtual list in `CodexSidebar` via TanStack Virtual when entry count > 100; `src/lib/db/compression.ts` with async `compressJSON`/`decompressJSON` (gzip via `CompressionStream`); `useSaveSceneContent` compresses documents > 50 KB before Dexie storage; `useSceneContentDecoded` hook transparently decompresses; `Editor.tsx` and `StoryTimeline.tsx` updated to use decoded hook.
 - **8.2 Series Support** — `/series/$seriesId` route + `SeriesHome.tsx` (novel grid, series codex panel); DB v2 adds `seriesId` index on `codex_entries`; `CodexEntry.seriesId` field; `buildAIContext` + debug variant include series entries; `useSeriesCodexEntries` + `useCreateSeriesCodexEntry` hooks; series section in library links to home page.
 - **8.1 Matrix View** — `MatrixView.tsx` with TanStack Virtual (rows + cols); frozen label column; Codex/Subplots dot-toggle, POV inline select, Labels badge-toggle; row type selector; added `'matrix'` to `PlanView` type; wired into plan route.
 - **7.3 Export** — `ExportPanel.tsx` (sheet, format selector, act checkboxes, front matter toggle); `build-manuscript.ts` (Dexie traversal + Tiptap-to-text); `docx-exporter.ts` (`docx` v9); `markdown-exporter.ts`; `scrivener-exporter.ts` (JSZip + XML); wired into NovelShell `export` sidebar panel.
-- **7.2 Import** — `ImportWizard.tsx` (2-step: file pick → preview tree → confirm); `parse-structure.ts` (DOCX via mammoth HTML + Markdown via line parser); append vs. new-novel modes; wired into CreateNovelDialog + Plan toolbar.
-- **7.1 Snippets** — `SnippetsSidebar.tsx`, `SnippetEditor.tsx`, `snippetsPinned` UIStore state, wired into NovelShell.
-- **6.1 Thread Management** — `ThreadSidebar.tsx` (CRUD, pin, archive, restore, double-click rename); `useUpdateChatMessage` added to chat hooks.
 
 ---
 
@@ -69,3 +67,5 @@ Between tasks — last completed **8.2 Series Support**.
 - Chat streaming: accumulated text tracked via `accumulatedRef` (not state) — avoids closure staleness. AI message saved to DB in `onDone` callback after stream completes.
 - react-markdown v10 + remark-gfm v4 installed for AI message markdown rendering.
 - `pnpm build` fails due to pre-existing `tsconfig.app.json` `ignoreDeprecations: "6.0"` flag issue (not related to Phase 6 work). `pnpm typecheck` (`tsc --noEmit`) passes clean.
+- PWA: `vite-plugin-pwa` v1.3 with Workbox. SVG icon at `public/icon.svg`. Manifest injected by plugin (not a static file). `index.html` has theme-color meta `#09090b`.
+- Compression: `src/lib/db/compression.ts` uses browser `CompressionStream`/`DecompressionStream` APIs. Threshold: 50 KB. `_compressed?: Uint8Array` field on `SceneContent` type. Use `useSceneContentDecoded` (not `useSceneContent`) in rendering components; raw hook is for direct DB access only.

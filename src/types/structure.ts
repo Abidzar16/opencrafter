@@ -42,4 +42,6 @@ export interface Scene {
 export interface SceneContent {
   id: string
   content: Record<string, unknown>
+  /** Gzip-compressed JSON; set for large documents (> 50 KB). content is {} when this is present. */
+  _compressed?: Uint8Array
 }
