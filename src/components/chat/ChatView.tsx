@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
-import { Download, Copy, PanelRight } from 'lucide-react'
+import { Download, Copy, PanelRight, PanelLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { toast } from 'sonner'
@@ -11,6 +11,7 @@ import { useChatThreads, useAddChatMessage } from '@/lib/db/hooks'
 import { useGenerateStream } from '@/lib/hooks/use-generate-stream'
 import { useUIStore } from '@/stores/ui-store'
 import { resolveChatSystemPrompt, buildChatContext } from '@/lib/ai/chat-context'
+import { cn } from '@/lib/utils'
 import { ChatRole, Provider } from '@/types'
 import type { ContextAttachment } from '@/types'
 import type { ChatMessage } from '@/types/chat'
@@ -215,10 +216,18 @@ export function ChatView({ novelId }: ChatViewProps) {
 
   const activeThread = threads.find(t => t.id === activeThreadId)
 
+  const [threadSidebarOpen, setThreadSidebarOpen] = useState(true)
+
   return (
     <div className="flex h-full">
-      {/* Thread sidebar */}
-      <aside className="border-border bg-sidebar w-56 shrink-0 border-r">
+      {/* Thread sidebar — hidden at < 640px, toggle button in top bar */}
+      <aside
+        className={cn(
+          'border-border bg-sidebar shrink-0 border-r transition-all',
+          threadSidebarOpen ? 'w-56' : 'w-0 overflow-hidden',
+          'max-sm:hidden',
+        )}
+      >
         <ThreadSidebar
           novelId={novelId}
           activeThreadId={activeThreadId}
@@ -230,9 +239,21 @@ export function ChatView({ novelId }: ChatViewProps) {
       <div className="flex min-w-0 flex-1 flex-col">
         {/* Top bar */}
         <div className="border-border flex h-10 shrink-0 items-center justify-between border-b px-4">
-          <span className="truncate text-sm font-medium">
-            {activeThread?.name ?? 'Select a thread'}
-          </span>
+          <div className="flex items-center gap-2">
+            {/* Thread sidebar toggle */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7"
+              onClick={() => setThreadSidebarOpen(v => !v)}
+              aria-label="Toggle thread list"
+            >
+              <PanelLeft className="h-3.5 w-3.5" />
+            </Button>
+            <span className="truncate text-sm font-medium">
+              {activeThread?.name ?? 'Select a thread'}
+            </span>
+          </div>
           <div className="flex items-center gap-1">
             <Tooltip>
               <TooltipTrigger asChild>

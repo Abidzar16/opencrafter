@@ -27,7 +27,10 @@ function WritePage() {
   const { focusMode, setFocusMode } = useUIStore()
 
   const [wordCounts, setWordCounts] = useState<Record<string, number>>({})
-  const [infoPanelOpen, setInfoPanelOpen] = useState(true)
+  // Default to closed on narrow screens (< 900px)
+  const [infoPanelOpen, setInfoPanelOpen] = useState(() =>
+    typeof window !== 'undefined' ? window.innerWidth >= 900 : true,
+  )
   const [activeEditor] = useState<TiptapEditor | null>(null)
 
   // Auto-select first chapter on load
@@ -135,13 +138,15 @@ function WritePage() {
               )}
             </div>
 
-            {/* Story timeline */}
+            {/* Story timeline — hidden below 900px */}
             {!focusMode && (
-              <StoryTimeline
-                chapterId={activeChapterId}
-                activeSceneId={activeSceneId}
-                onSceneClick={handleSceneActive}
-              />
+              <div className="max-[900px]:hidden">
+                <StoryTimeline
+                  chapterId={activeChapterId}
+                  activeSceneId={activeSceneId}
+                  onSceneClick={handleSceneActive}
+                />
+              </div>
             )}
           </div>
         </div>

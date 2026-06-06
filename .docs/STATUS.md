@@ -1,27 +1,26 @@
 # Opencrafter — Status
 
 **Last updated:** 2026-06-06
-**Phase:** 8 — Polish (Phase 8.3 complete)
+**Phase:** 8 — Polish (8.4 & 8.5 complete)
 
 ---
 
 ## Right Now
 
-Between tasks — last completed **8.3 PWA & Performance**.
+Between tasks — last completed **8.5 Responsive Layout**.
 
 ## Next Up
 
-1. **8.4 Cover Images** — Novel/codex image compression + storage quota warning.
-2. **8.5 Responsive Layout** — Tablet/mobile sidebar collapse.
-3. **8.6 Accessibility** — Keyboard nav audit, ARIA labels, color contrast.
-4. **7.3 remaining** — Per-scene export from scene action menu; revision history for prompt instructions.
+1. **8.6 Accessibility** — Keyboard nav audit, ARIA labels, color contrast, keyboard shortcuts.
+2. **7.3 remaining** — Per-scene export from scene action menu; revision history for prompt instructions.
+3. **Cross-Cutting Testing** — Unit + component tests (codex-detector, template-engine, context-builder, stream, library, plan grid, codex editor, chat).
 
 ## Recently Completed
 
-- **8.3 PWA & Performance** — `vite-plugin-pwa` installed; SVG app icon in `public/icon.svg`; PWA manifest (name, icon, theme_color `#09090b`, display: standalone) injected by plugin; Workbox service worker with CacheFirst for static assets + NetworkFirst for HTML navigation; `index.html` updated with theme-color meta; codex highlight debouncing with `requestIdleCallback` was already in place; virtual list in `CodexSidebar` via TanStack Virtual when entry count > 100; `src/lib/db/compression.ts` with async `compressJSON`/`decompressJSON` (gzip via `CompressionStream`); `useSaveSceneContent` compresses documents > 50 KB before Dexie storage; `useSceneContentDecoded` hook transparently decompresses; `Editor.tsx` and `StoryTimeline.tsx` updated to use decoded hook.
-- **8.2 Series Support** — `/series/$seriesId` route + `SeriesHome.tsx` (novel grid, series codex panel); DB v2 adds `seriesId` index on `codex_entries`; `CodexEntry.seriesId` field; `buildAIContext` + debug variant include series entries; `useSeriesCodexEntries` + `useCreateSeriesCodexEntry` hooks; series section in library links to home page.
-- **8.1 Matrix View** — `MatrixView.tsx` with TanStack Virtual (rows + cols); frozen label column; Codex/Subplots dot-toggle, POV inline select, Labels badge-toggle; row type selector; added `'matrix'` to `PlanView` type; wired into plan route.
-- **7.3 Export** — `ExportPanel.tsx` (sheet, format selector, act checkboxes, front matter toggle); `build-manuscript.ts` (Dexie traversal + Tiptap-to-text); `docx-exporter.ts` (`docx` v9); `markdown-exporter.ts`; `scrivener-exporter.ts` (JSZip + XML); wired into NovelShell `export` sidebar panel.
+- **8.5 Responsive Layout** — `NovelShell`: icon strip hidden at `< 640px` (`max-sm:hidden`), hamburger button opens Sheet drawer with sidebar icons; mode switcher collapses to DropdownMenu at `< 640px`; side panels (Codex/Snippets) hidden below 900px (`max-[900px]:hidden`). Write page: `infoPanelOpen` defaults to `false` when `window.innerWidth < 900`; StoryTimeline wrapped in `max-[900px]:hidden`. Grid view: `flex-col` at mobile, `flex-row sm:` for horizontal scroll at sm+. Chat: ThreadSidebar hidden at `max-sm:hidden` with PanelLeft toggle in top bar; prompt/model pickers row uses `flex-wrap`.
+- **8.4 Cover Images** — `src/lib/image-compress.ts`: canvas-based `compressImage()` using `createObjectURL` + `HTMLImageElement` + canvas `toDataURL` (WebP preferred, JPEG fallback); portrait default 800×1200 @ 80%, square default 400×400 @ 80%. `ImageUpload` component: removes raw FileReader path, calls `compressImage` async, shows spinner during compression, surfaces errors. `src/lib/hooks/use-storage-quota.ts`: checks `navigator.storage.estimate()` on mount, shows persistent sonner warning toast at ≥ 80% usage with "Export backup" action button, throttled via localStorage (7-day dismiss). Wired into `__root.tsx`.
+- **8.3 PWA & Performance** — `vite-plugin-pwa` + Workbox service worker; SVG icon; PWA manifest; `index.html` theme-color; CodexSidebar TanStack Virtual (> 100 entries); gzip compression for large scene_content (> 50 KB); `useSceneContentDecoded` hook; Editor + StoryTimeline use decoded hook.
+- **8.2 Series Support** — `/series/$seriesId` route; DB v2 `seriesId` index on `codex_entries`; series codex in `buildAIContext`.
 
 ---
 
@@ -69,3 +68,6 @@ Between tasks — last completed **8.3 PWA & Performance**.
 - `pnpm build` fails due to pre-existing `tsconfig.app.json` `ignoreDeprecations: "6.0"` flag issue (not related to Phase 6 work). `pnpm typecheck` (`tsc --noEmit`) passes clean.
 - PWA: `vite-plugin-pwa` v1.3 with Workbox. SVG icon at `public/icon.svg`. Manifest injected by plugin (not a static file). `index.html` has theme-color meta `#09090b`.
 - Compression: `src/lib/db/compression.ts` uses browser `CompressionStream`/`DecompressionStream` APIs. Threshold: 50 KB. `_compressed?: Uint8Array` field on `SceneContent` type. Use `useSceneContentDecoded` (not `useSceneContent`) in rendering components; raw hook is for direct DB access only.
+- Image compression: `src/lib/image-compress.ts` uses canvas API. Portrait (novel covers) → max 800×1200 @ 80% quality. Square (codex avatars) → max 400×400 @ 80% quality. WebP preferred; falls back to JPEG. `ImageUpload` component handles compression async with loading spinner.
+- Storage quota: `useStorageQuotaWarning` hook in `src/lib/hooks/use-storage-quota.ts`. Fires once on mount via `navigator.storage.estimate()`. Warn threshold 80%. Dismiss throttled 7 days via `opencrafter:storage-warn-dismissed` localStorage key.
+- Responsive: `max-sm:hidden` on icon sidebar (hamburger Sheet replaces it at mobile). `max-[900px]:hidden` on Codex/Snippets panels. Mode switcher uses DropdownMenu at `< 640px`. Write page panels default closed at `window.innerWidth < 900`. Grid view stacks vertically at mobile (`flex-col sm:flex-row`). Chat ThreadSidebar collapsible via PanelLeft toggle; hidden `max-sm:` with hamburger fallback in NovelShell sheet.
