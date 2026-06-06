@@ -1,13 +1,17 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { LayoutList, LayoutGrid, Kanban, Search } from 'lucide-react'
+import { useState } from 'react'
+import { LayoutList, LayoutGrid, Kanban, Search, FileUp, TableProperties } from 'lucide-react'
 import { PlanBoard } from '@/components/plan/plan-board'
 import { OutlineView } from '@/components/plan/outline-view'
 import { GridView } from '@/components/plan/grid-view'
+import { MatrixView } from '@/components/plan/matrix-view'
 import { SceneDetailPanel } from '@/components/plan/scene-detail-panel'
 import { CreateFromOutline } from '@/components/plan/create-from-outline'
 import { CardConfigPopover, useCardConfig } from '@/components/plan/card-config'
+import { ImportWizard } from '@/components/import/ImportWizard'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useUIStore, type PlanView } from '@/stores/ui-store'
 import { cn } from '@/lib/utils'
 
@@ -19,12 +23,14 @@ const VIEW_TABS: { key: PlanView; label: string; icon: React.ReactNode }[] = [
   { key: 'board', label: 'Board', icon: <Kanban className="h-3.5 w-3.5" /> },
   { key: 'outline', label: 'Outline', icon: <LayoutList className="h-3.5 w-3.5" /> },
   { key: 'grid', label: 'Grid', icon: <LayoutGrid className="h-3.5 w-3.5" /> },
+  { key: 'matrix', label: 'Matrix', icon: <TableProperties className="h-3.5 w-3.5" /> },
 ]
 
 function PlanPage() {
   const { novelId } = Route.useParams()
   const { planView, setPlanView, planSearch, setPlanSearch } = useUIStore()
   const [cardConfig, updateCardConfig] = useCardConfig()
+  const [importOpen, setImportOpen] = useState(false)
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
@@ -57,10 +63,19 @@ function PlanPage() {
           />
         </div>
 
-        <div className="ml-auto">
+        <div className="ml-auto flex items-center gap-1">
           {planView === 'grid' && (
             <CardConfigPopover config={cardConfig} onUpdate={updateCardConfig} />
           )}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setImportOpen(true)}>
+                <FileUp className="h-4 w-4" />
+                <span className="sr-only">Import content</span>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Import / add content</TooltipContent>
+          </Tooltip>
         </div>
       </div>
 
@@ -71,6 +86,7 @@ function PlanPage() {
         {planView === 'grid' && (
           <GridView novelId={novelId} config={cardConfig} search={planSearch} />
         )}
+        {planView === 'matrix' && <MatrixView novelId={novelId} />}
       </div>
 
       {/* Create from Outline panel (all views) */}
@@ -80,6 +96,8 @@ function PlanPage() {
 
       {/* Scene detail panel (sheet overlay) */}
       <SceneDetailPanel novelId={novelId} />
+
+      <ImportWizard open={importOpen} onOpenChange={setImportOpen} novelId={novelId} />
     </div>
   )
 }

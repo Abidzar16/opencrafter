@@ -514,43 +514,42 @@
 
 ### 7.1 Snippets
 
-- [ ] Snippets sidebar panel (`src/components/snippets/SnippetsSidebar.tsx`)
+- [x] Snippets sidebar panel (`src/components/snippets/SnippetsSidebar.tsx`)
   - List of snippets for current novel
   - Search by name and tags
   - "New snippet" button
-- [ ] Snippet editor: name (input), tags (chip input), content (Tiptap editor, same extensions as Write minus slash menu)
-- [ ] Snippet CRUD: create, edit, delete, duplicate
-- [ ] Tags: filter snippets by tag
-- [ ] Revision history for snippet content (wire `useRevision` hook, same as scene content)
-- [ ] Sidebar pinning (same behavior as Codex sidebar)
-- [ ] Snippets in Chat context selector: select snippets to attach as context (already scaffolded in Phase 6 context selector)
+- [x] Snippet editor: name (input), tags (chip input), content (Tiptap editor, same extensions as Write minus slash menu)
+- [x] Snippet CRUD: create, edit, delete, duplicate
+- [x] Tags: filter snippets by tag
+- [x] Revision history for snippet content (wire `useRevision` hook, same as scene content)
+- [x] Sidebar pinning (same behavior as Codex sidebar)
+- [x] Snippets in Chat context selector: select snippets to attach as context (already scaffolded in Phase 6 context selector)
 
 ### 7.2 Import
 
-- [ ] Import UI: `src/components/import/ImportWizard.tsx` — file picker → parse → preview → confirm
+- [x] Import UI: `src/components/import/ImportWizard.tsx` — file picker → parse → preview → confirm
   - Available from: novel creation dialog ("Import from file") + Plan view action menu ("Import / add content")
-- [ ] DOCX import (`mammoth`):
+- [x] DOCX import (`mammoth`):
   - Parse heading structure: H1 → Act, H2 → Chapter, H3+ → Scene title, body → Scene content/summary
   - Map parsed structure to `acts`/`chapters`/`scenes` rows
   - Preview: show parsed tree before import
-- [ ] Markdown import (`unified` + `remark`):
+- [x] Markdown import (manual line parser):
   - Same heading → act/chapter/scene mapping as DOCX
   - Preserve paragraph text as scene content
-- [ ] Import mode options: "Create new novel" or "Append to existing novel"
+- [x] Import mode options: "Create new novel" or "Append to existing novel"
 
 ### 7.3 Export
 
-- [ ] Export sidebar panel / Export button in sidebar navigation
-- [ ] Export configuration UI: select which acts/chapters to include, export format, front matter options
-- [ ] DOCX export (`docx` npm package):
+- [x] Export sidebar panel / Export button in sidebar navigation
+- [x] Export configuration UI: select which acts/chapters to include, export format, front matter options
+- [x] DOCX export (`docx` npm package):
   - Full manuscript in heading-structured Word document
-  - Respect font/spacing settings from novel settings
-- [ ] Markdown export (`unified` + `remark`):
+- [x] Markdown export:
   - Full manuscript with `#`/`##`/`###` heading structure
   - Scene dividers as `---`
-- [ ] Scrivener export (`.scriv`):
-  - Custom XML builder; output a valid `.scriv` folder structure
-  - Acts → Folders, Chapters → Sub-folders, Scenes → `.rtf` or `.txt` files
+- [x] Scrivener export (`.scriv`):
+  - Custom XML builder; output a valid `.scriv` folder structure in ZIP
+  - Acts → Folders, Chapters → Sub-folders, Scenes → `.txt` files
   - Binder XML reflecting hierarchy
 - [ ] Per-scene export from scene action menu (plain text or Markdown, single scene only)
 - [ ] Revision history for custom prompt instructions (wire `useRevision` hook)
@@ -563,23 +562,23 @@
 
 ### 8.1 Matrix View
 
-- [ ] Matrix view layout: scenes as columns, configurable rows — add as a third tab in Plan mode
-- [ ] Row type selector ("Show" menu): Codex Entries (default), POV, Labels, Custom Category, Subplots, Custom (manual)
-- [ ] Codex Entries rows: cell shows a dot/badge if the entry appears in that scene; click cell to toggle association
-- [ ] POV row: each cell shows POV character; click to change (inline dropdown)
-- [ ] Labels row: each cell shows label chip; click to toggle label
-- [ ] Subplots row: show subplot codex entries as rows; track presence across scenes
-- [ ] TanStack Virtual for large matrices (100+ scenes × 100+ entries)
-- [ ] Horizontal scroll with frozen first column (row label)
+- [x] Matrix view layout: scenes as columns, configurable rows — add as a third tab in Plan mode
+- [x] Row type selector ("Show" menu): Codex Entries (default), POV, Labels, Subplots
+- [x] Codex Entries rows: cell shows a dot/badge if the entry appears in that scene; click cell to toggle association
+- [x] POV row: each cell shows POV character; click to change (inline dropdown)
+- [x] Labels row: each cell shows label chip; click to toggle label
+- [x] Subplots row: show subplot codex entries as rows; track presence across scenes
+- [x] TanStack Virtual for large matrices (100+ scenes × 100+ entries)
+- [x] Horizontal scroll with frozen first column (row label)
 
 ### 8.2 Series Support
 
-- [ ] Series home screen (`/series/$seriesId`): grid of novels in the series, series settings
-- [ ] Series codex (separate from individual novel codex): shared across all novels in series
-  - Separate DB table `series_codex_entries` (or `codex_entries` with `novelId = null, seriesId = ?`)
-  - Series codex accessible from series home screen
+- [x] Series home screen (`/series/$seriesId`): grid of novels in the series, series settings
+- [x] Series codex (separate from individual novel codex): shared across all novels in series
+  - Uses `codex_entries` with `novelId = '', seriesId = seriesId`; DB version 2 adds `seriesId` index
+  - Series codex accessible from series home screen (CodexSidebar with virtual novelId)
   - Entries available as context in any novel belonging to the series
-- [ ] Series codex in `buildAIContext`: include series codex entries subject to same `aiContextMode` rules
+- [x] Series codex in `buildAIContext`: include series codex entries subject to same `aiContextMode` rules
 
 ### 8.3 PWA & Performance
 

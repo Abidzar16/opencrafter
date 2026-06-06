@@ -43,7 +43,15 @@ export async function buildAIContext(
   selectedText: string,
   manualEntryIds: string[] = [],
 ): Promise<ContextBlock[]> {
-  const allEntries = await db.codex_entries.where('novelId').equals(novelId).toArray()
+  const novel = await db.novels.get(novelId)
+  const novelEntries = await db.codex_entries.where('novelId').equals(novelId).toArray()
+
+  // Include series-level codex entries if this novel belongs to a series
+  const seriesEntries = novel?.seriesId
+    ? await db.codex_entries.where('seriesId').equals(novel.seriesId).toArray()
+    : []
+
+  const allEntries = [...novelEntries, ...seriesEntries]
 
   // Hard filter: NeverInclude — must apply before anything else
   const eligible: CodexEntry[] = filterNeverIncludeEntries(allEntries)
@@ -148,7 +156,12 @@ export async function debugBuildAIContext(
   selectedText: string,
   manualEntryIds: string[] = [],
 ): Promise<DebugContextResult> {
-  const allEntries = await db.codex_entries.where('novelId').equals(novelId).toArray()
+  const novel = await db.novels.get(novelId)
+  const novelEntries = await db.codex_entries.where('novelId').equals(novelId).toArray()
+  const seriesEntries = novel?.seriesId
+    ? await db.codex_entries.where('seriesId').equals(novel.seriesId).toArray()
+    : []
+  const allEntries = [...novelEntries, ...seriesEntries]
   const neverIncluded = allEntries.filter(e => e.aiContextMode === AiContextMode.NeverInclude)
   const excluded: DebugContextResult['excluded'] = neverIncluded.map(e => ({
     entryId: e.id,

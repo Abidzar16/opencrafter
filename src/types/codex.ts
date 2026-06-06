@@ -30,6 +30,7 @@ export interface CodexDetail {
 export interface CodexEntry {
   id: string
   novelId: string
+  seriesId?: string  // set for series-level entries (novelId = '' for series entries)
   type: CodexType
   name: string
   aliases: string[]

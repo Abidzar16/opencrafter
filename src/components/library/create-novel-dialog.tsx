@@ -11,10 +11,12 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ImageUpload } from '@/components/ui/image-upload'
+import { ImportWizard } from '@/components/import/ImportWizard'
 import { useCreateNovel } from '@/lib/db/hooks/novels'
 import { useSeries } from '@/lib/db/hooks/novels'
 import { useNavigate } from '@tanstack/react-router'
 import { toast } from '@/components/ui/toast-provider'
+import { FileUp } from 'lucide-react'
 
 interface CreateNovelDialogProps {
   open: boolean
@@ -26,6 +28,7 @@ export function CreateNovelDialog({ open, onOpenChange }: CreateNovelDialogProps
   const [seriesId, setSeriesId] = useState<string>('none')
   const [coverImage, setCoverImage] = useState<string>()
   const [loading, setLoading] = useState(false)
+  const [importOpen, setImportOpen] = useState(false)
 
   const seriesList = useSeries()
   const createNovel = useCreateNovel()
@@ -102,7 +105,16 @@ export function CreateNovelDialog({ open, onOpenChange }: CreateNovelDialogProps
           </div>
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="flex-row items-center">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="mr-auto gap-1.5"
+            onClick={() => { handleClose(); setImportOpen(true) }}
+          >
+            <FileUp className="h-3.5 w-3.5" />
+            Import from file
+          </Button>
           <Button variant="outline" onClick={handleClose}>
             Cancel
           </Button>
@@ -112,5 +124,7 @@ export function CreateNovelDialog({ open, onOpenChange }: CreateNovelDialogProps
         </DialogFooter>
       </DialogContent>
     </Dialog>
+
+    <ImportWizard open={importOpen} onOpenChange={setImportOpen} />
   )
 }

@@ -1,28 +1,28 @@
 # Opencrafter — Status
 
-**Last updated:** 2026-06-04
-**Phase:** 6 — Chat Module (Phase 6 complete)
+**Last updated:** 2026-06-06
+**Phase:** 8 — Polish (Phases 7 complete, 8.1–8.2 complete)
 
 ---
 
 ## Right Now
 
-Between tasks — last completed **6.5 Thread Export & Split View**. Phase 6 complete.
+Between tasks — last completed **8.2 Series Support**.
 
 ## Next Up
 
-1. **7.1 Snippets** — `SnippetsSidebar.tsx`, Tiptap editor, CRUD, tags, revision history, sidebar pinning.
-2. **7.2 Import** — `ImportWizard.tsx`, DOCX (mammoth) + Markdown import, heading→act/chapter/scene mapping, preview step.
-3. **7.3 Export** — DOCX, Markdown, Scrivener (.scriv) export; per-scene export from scene action menu.
-4. **8.1 Matrix View** — Third Plan view; configurable rows (Codex, POV, Labels, Subplots); TanStack Virtual for large matrices.
-5. **8.2 Series Support** — Series home screen, series codex (shared across novels).
+1. **7.3 remaining** — Per-scene export from scene action menu; revision history for prompt instructions.
+2. **8.3 PWA & Performance** — vite-plugin-pwa, Workbox service worker, performance profiling.
+3. **8.4 Cover Images** — Novel/codex image compression + storage quota warning.
+4. **8.5 Responsive Layout** — Tablet/mobile sidebar collapse.
 
 ## Recently Completed
 
-- **6.5 Thread Export & Split View** — Export .md/.txt download, copy full conversation, split-view toggle (UIStore `chatSplitView` state).
-- **6.4 Extract Feature** — `ExtractModal.tsx` with 3 tabs: Codex (parse `Name (aliases) [tags]: Description`), Plan (`#`/`##` → acts/chapters/scenes), Beats (copy formatted text).
-- **6.3 Context Selector & MessageBar** — `ContextSelector.tsx` (Novel / Codex / Snippets tabs, checkboxes with hierarchy); `MessageBar.tsx` (context pills, prompt/model pickers, Enter=send).
-- **6.2 Chat Interface** — `MessageBubble.tsx` (react-markdown v10 + remark-gfm, hover actions: copy/delete/regenerate/extract); `MessageList.tsx` (auto-scroll, `StreamingBubble` with cursor).
+- **8.2 Series Support** — `/series/$seriesId` route + `SeriesHome.tsx` (novel grid, series codex panel); DB v2 adds `seriesId` index on `codex_entries`; `CodexEntry.seriesId` field; `buildAIContext` + debug variant include series entries; `useSeriesCodexEntries` + `useCreateSeriesCodexEntry` hooks; series section in library links to home page.
+- **8.1 Matrix View** — `MatrixView.tsx` with TanStack Virtual (rows + cols); frozen label column; Codex/Subplots dot-toggle, POV inline select, Labels badge-toggle; row type selector; added `'matrix'` to `PlanView` type; wired into plan route.
+- **7.3 Export** — `ExportPanel.tsx` (sheet, format selector, act checkboxes, front matter toggle); `build-manuscript.ts` (Dexie traversal + Tiptap-to-text); `docx-exporter.ts` (`docx` v9); `markdown-exporter.ts`; `scrivener-exporter.ts` (JSZip + XML); wired into NovelShell `export` sidebar panel.
+- **7.2 Import** — `ImportWizard.tsx` (2-step: file pick → preview tree → confirm); `parse-structure.ts` (DOCX via mammoth HTML + Markdown via line parser); append vs. new-novel modes; wired into CreateNovelDialog + Plan toolbar.
+- **7.1 Snippets** — `SnippetsSidebar.tsx`, `SnippetEditor.tsx`, `snippetsPinned` UIStore state, wired into NovelShell.
 - **6.1 Thread Management** — `ThreadSidebar.tsx` (CRUD, pin, archive, restore, double-click rename); `useUpdateChatMessage` added to chat hooks.
 
 ---

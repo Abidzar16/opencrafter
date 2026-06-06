@@ -5,6 +5,8 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { Separator } from '@/components/ui/separator'
 import { SaveIndicator } from './save-indicator'
 import { CodexSidebar } from '@/components/codex/CodexSidebar'
+import { SnippetsSidebar } from '@/components/snippets/SnippetsSidebar'
+import { ExportPanel } from '@/components/export/ExportPanel'
 import { useUIStore } from '@/stores/ui-store'
 import { useNovel } from '@/lib/db/hooks/novels'
 import { cn } from '@/lib/utils'
@@ -53,7 +55,7 @@ const sidebarItems = [
 
 export function NovelShell({ novelId, children }: NovelShellProps) {
   const novel = useNovel(novelId)
-  const { sidebarCollapsed, toggleSidebar, activePanel, setActivePanel, codexPinned } = useUIStore()
+  const { sidebarCollapsed, toggleSidebar, activePanel, setActivePanel, codexPinned, snippetsPinned } = useUIStore()
   const location = useLocation()
   const currentMode = modes.find(m => location.pathname.endsWith(m.key))?.key ?? 'plan'
 
@@ -169,9 +171,22 @@ export function NovelShell({ novelId, children }: NovelShellProps) {
           </div>
         )}
 
+        {(activePanel === 'snippets' || snippetsPinned) && (
+          <div className="border-border bg-background w-72 shrink-0 overflow-hidden border-r">
+            <SnippetsSidebar novelId={novelId} />
+          </div>
+        )}
+
         {/* Main panel */}
         <main className="flex-1 overflow-auto">{children}</main>
       </div>
+
+      {/* Export panel (sheet overlay) */}
+      <ExportPanel
+        open={activePanel === 'export'}
+        novelId={novelId}
+        onClose={() => setActivePanel(null)}
+      />
     </div>
   )
 }

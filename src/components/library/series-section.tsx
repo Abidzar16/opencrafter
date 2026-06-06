@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from '@tanstack/react-router'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ActionMenu, type ActionMenuItem } from '@/components/ui/action-menu'
@@ -6,7 +7,7 @@ import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { useUpdateSeries, useDeleteSeries } from '@/lib/db/hooks/novels'
 import type { Series, Novel } from '@/types'
 import { NovelCard } from './novel-card'
-import { ChevronDown, ChevronRight, FolderOpen } from 'lucide-react'
+import { ChevronDown, ChevronRight, FolderOpen, ExternalLink } from 'lucide-react'
 import { toast } from '@/components/ui/toast-provider'
 
 interface SeriesSectionProps {
@@ -58,6 +59,7 @@ export function SeriesSection({
 
   const actions: ActionMenuItem[] = [
     { label: 'Rename', onClick: () => setRenaming(true) },
+    { label: 'Open series home', onClick: () => {} },  // handled via Link below
     { label: 'Delete series', onClick: () => setDeleteOpen(true), destructive: true, separator: true },
   ]
 
@@ -93,6 +95,12 @@ export function SeriesSection({
             <span>{series.name}</span>
           )}
           <span className="text-muted-foreground font-normal">({novels.length})</span>
+        </Button>
+        <Button variant="ghost" size="icon" className="h-7 w-7" title="Series home" asChild>
+          <Link to="/series/$seriesId" params={{ seriesId: series.id }}>
+            <ExternalLink className="h-3.5 w-3.5" />
+            <span className="sr-only">Series home</span>
+          </Link>
         </Button>
         <ActionMenu actions={actions} />
       </div>

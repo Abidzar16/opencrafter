@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SplatRouteImport } from './routes/$'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SeriesSeriesIdRouteImport } from './routes/series.$seriesId'
 import { Route as NovelNovelIdRouteImport } from './routes/novel.$novelId'
 import { Route as NovelNovelIdIndexRouteImport } from './routes/novel.$novelId.index'
 import { Route as NovelNovelIdWriteRouteImport } from './routes/novel.$novelId.write'
@@ -32,6 +33,11 @@ const SplatRoute = SplatRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SeriesSeriesIdRoute = SeriesSeriesIdRouteImport.update({
+  id: '/series/$seriesId',
+  path: '/series/$seriesId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const NovelNovelIdRoute = NovelNovelIdRouteImport.update({
@@ -70,6 +76,7 @@ export interface FileRoutesByFullPath {
   '/$': typeof SplatRoute
   '/settings': typeof SettingsRoute
   '/novel/$novelId': typeof NovelNovelIdRouteWithChildren
+  '/series/$seriesId': typeof SeriesSeriesIdRoute
   '/novel/$novelId/chat': typeof NovelNovelIdChatRoute
   '/novel/$novelId/plan': typeof NovelNovelIdPlanRoute
   '/novel/$novelId/review': typeof NovelNovelIdReviewRoute
@@ -80,6 +87,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
   '/settings': typeof SettingsRoute
+  '/series/$seriesId': typeof SeriesSeriesIdRoute
   '/novel/$novelId/chat': typeof NovelNovelIdChatRoute
   '/novel/$novelId/plan': typeof NovelNovelIdPlanRoute
   '/novel/$novelId/review': typeof NovelNovelIdReviewRoute
@@ -92,6 +100,7 @@ export interface FileRoutesById {
   '/$': typeof SplatRoute
   '/settings': typeof SettingsRoute
   '/novel/$novelId': typeof NovelNovelIdRouteWithChildren
+  '/series/$seriesId': typeof SeriesSeriesIdRoute
   '/novel/$novelId/chat': typeof NovelNovelIdChatRoute
   '/novel/$novelId/plan': typeof NovelNovelIdPlanRoute
   '/novel/$novelId/review': typeof NovelNovelIdReviewRoute
@@ -105,6 +114,7 @@ export interface FileRouteTypes {
     | '/$'
     | '/settings'
     | '/novel/$novelId'
+    | '/series/$seriesId'
     | '/novel/$novelId/chat'
     | '/novel/$novelId/plan'
     | '/novel/$novelId/review'
@@ -115,6 +125,7 @@ export interface FileRouteTypes {
     | '/'
     | '/$'
     | '/settings'
+    | '/series/$seriesId'
     | '/novel/$novelId/chat'
     | '/novel/$novelId/plan'
     | '/novel/$novelId/review'
@@ -126,6 +137,7 @@ export interface FileRouteTypes {
     | '/$'
     | '/settings'
     | '/novel/$novelId'
+    | '/series/$seriesId'
     | '/novel/$novelId/chat'
     | '/novel/$novelId/plan'
     | '/novel/$novelId/review'
@@ -138,6 +150,7 @@ export interface RootRouteChildren {
   SplatRoute: typeof SplatRoute
   SettingsRoute: typeof SettingsRoute
   NovelNovelIdRoute: typeof NovelNovelIdRouteWithChildren
+  SeriesSeriesIdRoute: typeof SeriesSeriesIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -161,6 +174,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/series/$seriesId': {
+      id: '/series/$seriesId'
+      path: '/series/$seriesId'
+      fullPath: '/series/$seriesId'
+      preLoaderRoute: typeof SeriesSeriesIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/novel/$novelId': {
@@ -233,6 +253,7 @@ const rootRouteChildren: RootRouteChildren = {
   SplatRoute: SplatRoute,
   SettingsRoute: SettingsRoute,
   NovelNovelIdRoute: NovelNovelIdRouteWithChildren,
+  SeriesSeriesIdRoute: SeriesSeriesIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

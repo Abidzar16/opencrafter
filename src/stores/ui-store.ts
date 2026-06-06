@@ -2,12 +2,13 @@ import { create } from 'zustand'
 
 export type SaveStatus = 'idle' | 'saving' | 'saved' | 'error'
 export type ActivePanel = 'codex' | 'snippets' | 'prompts' | 'export' | null
-export type PlanView = 'board' | 'outline' | 'grid'
+export type PlanView = 'board' | 'outline' | 'grid' | 'matrix'
 
 interface UIState {
   sidebarCollapsed: boolean
   activePanel: ActivePanel
   codexPinned: boolean
+  snippetsPinned: boolean
   focusMode: boolean
   saveStatus: SaveStatus
   // modal visibility flags
@@ -26,6 +27,8 @@ interface UIState {
   setActivePanel: (panel: ActivePanel) => void
   setCodexPinned: (v: boolean) => void
   toggleCodexPinned: () => void
+  setSnippetsPinned: (v: boolean) => void
+  toggleSnippetsPinned: () => void
   setFocusMode: (v: boolean) => void
   setSaveStatus: (status: SaveStatus) => void
   setNovelSettingsOpen: (v: boolean) => void
@@ -41,6 +44,7 @@ export const useUIStore = create<UIState>()(set => ({
   sidebarCollapsed: false,
   activePanel: null,
   codexPinned: false,
+  snippetsPinned: false,
   focusMode: false,
   saveStatus: 'idle',
   novelSettingsOpen: false,
@@ -56,6 +60,8 @@ export const useUIStore = create<UIState>()(set => ({
   setActivePanel: panel => set({ activePanel: panel }),
   setCodexPinned: v => set({ codexPinned: v }),
   toggleCodexPinned: () => set(s => ({ codexPinned: !s.codexPinned })),
+  setSnippetsPinned: v => set({ snippetsPinned: v }),
+  toggleSnippetsPinned: () => set(s => ({ snippetsPinned: !s.snippetsPinned })),
   setFocusMode: v => set({ focusMode: v }),
   setSaveStatus: status => set({ saveStatus: status }),
   setNovelSettingsOpen: v => set({ novelSettingsOpen: v }),

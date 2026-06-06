@@ -53,8 +53,6 @@ export class OpenCrafterDB extends Dexie {
     super('opencrafter')
 
     // Version 1 — baseline schema
-    // To add new columns in a future version: increment version number and
-    // add a migration in .upgrade(tx => {...}). Never modify version 1.
     this.version(1).stores({
       novels: 'id, seriesId, archived, updatedAt',
       series: 'id',
@@ -76,6 +74,11 @@ export class OpenCrafterDB extends Dexie {
       api_keys: 'id, provider',
       revisions: 'id, entityType, entityId',
       labels: 'id, novelId',
+    })
+
+    // Version 2 — add seriesId index to codex_entries for series-level codex support
+    this.version(2).stores({
+      codex_entries: 'id, novelId, seriesId, type, [novelId+type]',
     })
   }
 }

@@ -147,3 +147,24 @@ export function useCodexProgressionsByScene(sceneId: string | undefined) {
     [sceneId],
   )
 }
+
+// Series Codex
+
+export function useSeriesCodexEntries(seriesId: string | undefined) {
+  return useLiveQuery(
+    () => (seriesId ? db.codex_entries.where('seriesId').equals(seriesId).toArray() : []),
+    [seriesId],
+  )
+}
+
+export function useCreateSeriesCodexEntry() {
+  return async (
+    seriesId: string,
+    data: Omit<CodexEntry, 'id' | 'createdAt' | 'updatedAt' | 'novelId'>,
+  ): Promise<string> => {
+    const id = crypto.randomUUID()
+    const now = Date.now()
+    await db.codex_entries.add({ id, novelId: '', seriesId, ...data, createdAt: now, updatedAt: now })
+    return id
+  }
+}
