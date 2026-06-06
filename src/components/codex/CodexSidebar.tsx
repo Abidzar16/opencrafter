@@ -1,5 +1,6 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useRef } from 'react'
 import { Plus, Search, ChevronRight, ChevronDown, BookOpen, Pin, PinOff } from 'lucide-react'
+import { useVirtualizer } from '@tanstack/react-virtual'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -30,6 +31,11 @@ const TYPE_ORDER: CodexType[] = [
   CodexType.Subplot,
   CodexType.Other,
 ]
+
+type VirtualItem =
+  | { kind: 'header'; type: CodexType }
+  | { kind: 'entry'; entry: CodexEntry }
+  | { kind: 'empty'; type: CodexType }
 
 interface CodexSidebarProps {
   novelId: string
@@ -96,6 +102,29 @@ export function CodexSidebar({ novelId }: CodexSidebarProps) {
     setNewEntryType(null)
   }
 
+  // Use TanStack Virtual when total entry count exceeds 100
+  const useVirtual = entries.length > 100
+
+  const flatItems = useMemo<VirtualItem[]>(() => {
+    if (!useVirtual) return []
+    const items: VirtualItem[] = []
+    for (const type of TYPE_ORDER) {
+      const typeEntries = grouped.get(type) ?? []
+      if (typeEntries.length === 0 && search) continue
+      items.push({ kind: 'header', type })
+      if (!collapsed.has(type)) {
+        if (typeEntries.length === 0) {
+          items.push({ kind: 'empty', type })
+        } else {
+          for (const entry of typeEntries) {
+            items.push({ kind: 'entry', entry })
+          }
+        }
+      }
+    }
+    return items
+  }, [useVirtual, grouped, collapsed, search])
+
   return (
     <>
       <div className="flex h-full flex-col">
@@ -136,22 +165,31 @@ export function CodexSidebar({ novelId }: CodexSidebarProps) {
         </div>
 
         {/* Entry list */}
-        <ScrollArea className="flex-1">
-          {entries.length === 0 ? (
-            <div className="px-3 py-6">
-              <EmptyState
-                icon={<BookOpen className="h-8 w-8" />}
-                title="No codex entries"
-                description="Add characters, locations, lore, and more."
-                action={
-                  <Button size="sm" onClick={() => openNewEntry()}>
-                    <Plus className="mr-1 h-3.5 w-3.5" />
-                    New entry
-                  </Button>
-                }
-              />
-            </div>
-          ) : (
+        {entries.length === 0 ? (
+          <div className="px-3 py-6">
+            <EmptyState
+              icon={<BookOpen className="h-8 w-8" />}
+              title="No codex entries"
+              description="Add characters, locations, lore, and more."
+              action={
+                <Button size="sm" onClick={() => openNewEntry()}>
+                  <Plus className="mr-1 h-3.5 w-3.5" />
+                  New entry
+                </Button>
+              }
+            />
+          </div>
+        ) : useVirtual ? (
+          <VirtualEntryList
+            items={flatItems}
+            collapsed={collapsed}
+            selectedEntryId={selectedEntryId}
+            onToggleSection={toggleSection}
+            onOpenEntry={openEntry}
+            onNewEntry={openNewEntry}
+          />
+        ) : (
+          <ScrollArea className="flex-1">
             <div className="py-1">
               {TYPE_ORDER.map(type => {
                 const typeEntries = grouped.get(type) ?? []
@@ -199,8 +237,8 @@ export function CodexSidebar({ novelId }: CodexSidebarProps) {
                 )
               })}
             </div>
-          )}
-        </ScrollArea>
+          </ScrollArea>
+        )}
       </div>
 
       {/* Entry editor sheet */}
@@ -216,6 +254,108 @@ export function CodexSidebar({ novelId }: CodexSidebarProps) {
         }}
       />
     </>
+  )
+}
+
+function VirtualEntryList({
+  items,
+  collapsed,
+  selectedEntryId,
+  onToggleSection,
+  onOpenEntry,
+  onNewEntry,
+}: {
+  items: VirtualItem[]
+  collapsed: Set<string>
+  selectedEntryId: string | null
+  onToggleSection: (type: string) => void
+  onOpenEntry: (id: string) => void
+  onNewEntry: (type: CodexType) => void
+}) {
+  const parentRef = useRef<HTMLDivElement>(null)
+
+  const rowVirtualizer = useVirtualizer({
+    count: items.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: i => {
+      const item = items[i]
+      if (!item) return 32
+      return item.kind === 'header' ? 32 : 36
+    },
+    overscan: 10,
+  })
+
+  return (
+    <div ref={parentRef} className="flex-1 overflow-y-auto py-1">
+      <div
+        style={{ height: `${rowVirtualizer.getTotalSize()}px`, position: 'relative' }}
+      >
+        {rowVirtualizer.getVirtualItems().map(vItem => {
+          const item = items[vItem.index]
+          if (!item) return null
+          return (
+            <div
+              key={vItem.key}
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                transform: `translateY(${vItem.start}px)`,
+              }}
+            >
+              {item.kind === 'header' && (
+                <SectionHeader
+                  type={item.type}
+                  collapsed={collapsed.has(item.type)}
+                  onToggle={() => onToggleSection(item.type)}
+                />
+              )}
+              {item.kind === 'entry' && (
+                <EntryRow
+                  entry={item.entry}
+                  selected={selectedEntryId === item.entry.id}
+                  onClick={() => onOpenEntry(item.entry.id)}
+                />
+              )}
+              {item.kind === 'empty' && (
+                <button
+                  className="text-muted-foreground hover:text-foreground flex w-full items-center gap-1.5 px-5 py-1 text-xs transition-colors"
+                  onClick={() => onNewEntry(item.type)}
+                >
+                  <Plus className="h-3 w-3" />
+                  Add {TYPE_LABELS[item.type].toLowerCase().replace(/s$/, '')}
+                </button>
+              )}
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+function SectionHeader({
+  type,
+  collapsed,
+  onToggle,
+}: {
+  type: CodexType
+  collapsed: boolean
+  onToggle: () => void
+}) {
+  return (
+    <button
+      className="text-muted-foreground hover:text-foreground flex w-full items-center gap-1 px-3 py-1.5 text-xs font-medium uppercase tracking-wider transition-colors"
+      onClick={onToggle}
+    >
+      {collapsed ? (
+        <ChevronRight className="h-3 w-3 shrink-0" />
+      ) : (
+        <ChevronDown className="h-3 w-3 shrink-0" />
+      )}
+      <span className="flex-1 text-left">{TYPE_LABELS[type]}</span>
+    </button>
   )
 }
 

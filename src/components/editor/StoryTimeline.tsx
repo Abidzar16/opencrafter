@@ -1,4 +1,4 @@
-import { useScenesByChapter, useSceneContent } from '@/lib/db/hooks'
+import { useScenesByChapter, useSceneContentDecoded } from '@/lib/db/hooks'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
 
@@ -10,7 +10,7 @@ interface StoryTimelineProps {
 
 // Fetch word count for a single scene from its scene_content
 function useSceneWordCount(sceneId: string): number {
-  const content = useSceneContent(sceneId)
+  const content = useSceneContentDecoded(sceneId)
   if (!content?.content) return 0
   // Rough word count from Tiptap JSON: extract all text
   const text = extractText(content.content as Record<string, unknown>)

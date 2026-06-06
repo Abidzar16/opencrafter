@@ -582,17 +582,17 @@
 
 ### 8.3 PWA & Performance
 
-- [ ] PWA manifest (`manifest.json`): name, icons, theme color, display: standalone
-- [ ] Vite PWA plugin (`vite-plugin-pwa`) with Workbox service worker
+- [x] PWA manifest (`manifest.json`): name, icons, theme color, display: standalone
+- [x] Vite PWA plugin (`vite-plugin-pwa`) with Workbox service worker
   - Cache strategy: CacheFirst for static assets, NetworkFirst for HTML
   - Full offline after first load (all JS/CSS/assets cached)
 - [ ] Performance profiling: create a test novel with 150 scenes and 200 codex entries; measure:
   - Codex highlight detection pass duration (target: < 200ms)
   - Grid view render time (target: < 100ms first render)
   - Dexie query time for full novel load
-- [ ] Codex highlight debouncing: use `requestIdleCallback` (with `setTimeout` fallback) rather than fixed debounce to avoid blocking typing
-- [ ] Virtual list for codex sidebar when entry count > 100 (TanStack Virtual)
-- [ ] Tiptap JSON compression consideration: if scene_content is large, gzip before Dexie storage
+- [x] Codex highlight debouncing: use `requestIdleCallback` (with `setTimeout` fallback) rather than fixed debounce to avoid blocking typing
+- [x] Virtual list for codex sidebar when entry count > 100 (TanStack Virtual)
+- [x] Tiptap JSON compression consideration: if scene_content is large, gzip before Dexie storage
 
 ### 8.4 Cover Images
 

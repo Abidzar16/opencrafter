@@ -12,7 +12,8 @@ import { SectionNode } from './extensions/section-node'
 import { SlashMenu } from './extensions/slash-menu'
 import { CodexHighlight } from './extensions/codex-highlight'
 import { createCodexDetectionPlugin, CODEX_DETECTION_META } from './extensions/codex-detection-plugin'
-import { useSceneContent, useSaveSceneContent, useUpdateScene, useUpdateCodexEntry } from '@/lib/db/hooks'
+import { useSceneContentDecoded, useSaveSceneContent, useUpdateScene, useUpdateCodexEntry } from '@/lib/db/hooks'
+import { decompressJSON } from '@/lib/db/compression'
 import { useDebouncedSave } from '@/lib/hooks/use-debounced-save'
 import { useRevision } from '@/lib/hooks/use-revision'
 import { RevisionEntityType } from '@/types'
@@ -34,7 +35,7 @@ export function Editor({
   onEditorReady,
   onWordCountChange,
 }: EditorProps) {
-  const sceneContent = useSceneContent(sceneId)
+  const sceneContent = useSceneContentDecoded(sceneId)
   const saveSceneContent = useSaveSceneContent()
   const updateScene = useUpdateScene()
   const updateCodexEntry = useUpdateCodexEntry()
@@ -68,8 +69,13 @@ export function Editor({
     const json = editor.getJSON()
 
     const stored = await db.scene_content.get(sceneId)
-    if (stored?.content && Object.keys(stored.content).length > 0) {
-      await saveRevision(JSON.stringify(stored.content))
+    if (stored) {
+      const storedContent = stored._compressed
+        ? await decompressJSON(stored._compressed)
+        : stored.content
+      if (Object.keys(storedContent).length > 0) {
+        await saveRevision(JSON.stringify(storedContent))
+      }
     }
 
     await saveSceneContent(sceneId, json)
